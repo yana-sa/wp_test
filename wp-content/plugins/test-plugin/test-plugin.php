@@ -49,7 +49,6 @@ add_action('after_setup_theme', 'insert_book_category');
 //Shortcode to show recently added books
 function fetch_books_shortcode()
 {
-
     $query = new WP_Query([
         'post_type' => 'books',
         'posts_per_page' => 3
