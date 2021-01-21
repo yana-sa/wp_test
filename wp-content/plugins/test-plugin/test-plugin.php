@@ -43,15 +43,6 @@ function insert_book_category() {
 add_action( 'after_setup_theme', 'insert_book_category' );
 
 //Shortcode to show recently added books
-/*function fetch_books_shortcode() {
-
-    $message = 'Books will be displayed here';
-
-    return $message;
-}
-add_shortcode('fetched_books', 'fetch_books_shortcode');*/
-
-
 function fetch_books_shortcode(){
 
     $query = new WP_Query([
