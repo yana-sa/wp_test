@@ -53,7 +53,7 @@ function fetch_books_shortcode(){
     if ($query->have_posts()) {
         while ($query->have_posts()) {
             $query->the_post();
-            echo '<li>' . get_the_title() . '</li>';
+            echo '<li><a href="'.get_permalink().'">' . get_the_title() . '</a></li>';
         }
     } else {
         echo 'Not found';
