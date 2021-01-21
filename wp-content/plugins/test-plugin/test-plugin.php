@@ -55,7 +55,7 @@ add_shortcode('fetched_books', 'fetch_books_shortcode');*/
 function fetch_books_shortcode(){
 
     $query = new WP_Query([
-        'category_name' => 'book-category',
+        'post_type' => 'books',
         'posts_per_page' => 3
     ]);
 
