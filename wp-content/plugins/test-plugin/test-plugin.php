@@ -78,7 +78,7 @@ function rating_for_books_box()
     );
 }
 
-add_action("add_meta_boxes_books", "rating_for_books_box");
+add_action('add_meta_boxes_books', 'rating_for_books_box');
 
 function rating_for_books_content($post)
 {
