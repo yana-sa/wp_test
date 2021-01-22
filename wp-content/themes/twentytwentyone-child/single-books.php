@@ -4,7 +4,9 @@
  *
  */
 get_header();
-/* Start the Loop */
+
+global $post;
+$rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -15,8 +17,6 @@ get_header();
 	</header>
 
     <div class="entry-content alignwide"><?php
-        global $post;
-        $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
         echo "<h4>Rating: $rating_for_books"; ?>
     </div>
 
