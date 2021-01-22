@@ -97,3 +97,46 @@ function rating_for_books_box_save($post_id)
 
 add_action('save_post', 'rating_for_books_box_save');
 
+//Add 'Top' custom field to Books
+function top_for_books_box()
+{
+    add_meta_box(
+        'top_for_books',
+        __('Top', 'sitepoint'),
+        'top_for_books_content'
+    );
+}
+
+add_action('add_meta_boxes_books', 'top_for_books_box');
+
+function top_for_books_content($post)
+{
+    $value = get_post_meta($post->ID, '_top_for_books', true);
+    $is_top = ((int)$value == 1) ? 'checked' : '';
+
+    echo '<input formmethod="post" type="checkbox" id="top_for_books" name="top_for_books" value="1"' . $is_top . '>
+          <label for="top_for_books">Top</label>';
+}
+
+function top_for_books_box_save($post_id)
+{
+    $top = isset($_POST['top_for_books']) && $_POST['top_for_books'] == 1;
+    update_post_meta($post_id, '_top_for_books', $top);
+}
+
+add_action('save_post', 'top_for_books_box_save');
+
+function display_top_for_books ( $title )
+{
+    global $post;
+    $top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
+
+    if (($top_for_books == '1') && !is_admin()) {
+        $title = '<h1>&#11088' . $title;
+        return $title;
+    } else {
+        return $title;
+    }
+}
+
+add_filter('the_title', 'display_top_for_books');

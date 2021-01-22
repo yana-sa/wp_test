@@ -7,12 +7,14 @@ get_header();
 
 global $post;
 $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
+$top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
+
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 	<header class="entry-header alignwide">
-		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+        <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 		<?php twenty_twenty_one_post_thumbnail(); ?>
 	</header>
 
