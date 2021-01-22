@@ -26,8 +26,9 @@ function create_books_post_type()
             'show_in_rest' => true,
             'show_in_menu' => true,
             'taxonomies' => ['category', 'post_tag'],
-            'supports' => ['title', 'editor'],
-            'menu_position' => 5
+            'supports' => ['title', 'editor', 'custom-fields'],
+            'menu_position' => 5,
+            'register_meta_box_cb' => 'rating_for_books_box'
         ]
     );
 }
@@ -66,3 +67,44 @@ function fetch_books_shortcode()
 }
 
 add_shortcode('fetched_books', 'fetch_books_shortcode');
+
+//Add 'Rating' custom field to Books
+function rating_for_books_box()
+{
+    add_meta_box(
+        'rating_for_books',
+        __('Rating', 'sitepoint'),
+        'rating_for_books_content'
+    );
+}
+
+add_action("add_meta_boxes_books", "rating_for_books_box");
+
+function rating_for_books_content($post)
+{
+    $value = get_post_meta($post->ID, '_rating_for_books', true);
+    echo '<textarea style="width:100%" id="rating_for_books" name="rating_for_books">' . $value . '</textarea>';
+}
+
+function rating_for_books_box_save($post_id)
+{
+    $rating = $_POST['rating_for_books'];
+    if (!isset($rating)) {
+        $rating = 0;
+    }
+    update_post_meta($post_id, '_rating_for_books', $rating);
+}
+
+add_action('save_post', 'rating_for_books_box_save');
+
+function display_rating_for_books($content)
+{
+    global $post;
+
+    $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
+    $notice = "<div>Rating: $rating_for_books</div>";
+
+    return $notice . $content;
+}
+
+add_filter('the_content', 'display_rating_for_books');
