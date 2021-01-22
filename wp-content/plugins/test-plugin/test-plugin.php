@@ -132,7 +132,7 @@ function display_top_for_books ( $title )
     $top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
 
     if (($top_for_books == '1') && !is_admin()) {
-        $title = '<h1>&#11088' . $title;
+        $title = '&#11088' . $title;
         return $title;
     } else {
         return $title;
