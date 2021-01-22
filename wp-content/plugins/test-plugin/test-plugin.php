@@ -97,16 +97,3 @@ function rating_for_books_box_save($post_id)
 
 add_action('save_post', 'rating_for_books_box_save');
 
-function display_rating_for_books($content)
-{
-    global $post;
-    $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
-
-    if (!is_admin()) {
-        $notice = "<div>Rating: $rating_for_books</div>";
-        return $notice . $content;
-    }
-    return $content;
-}
-
-add_filter('the_content', 'display_rating_for_books');
