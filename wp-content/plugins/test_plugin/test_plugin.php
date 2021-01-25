@@ -11,14 +11,13 @@ Version: 1.0.0
 //Seeding books on plugin activation
 function insert_books()
 {
-    $randtitle = 'The Book ' . rand(1, 99);
-    $randdesc = 'This is a test description ' . rand(1, 99) . '. Date: ' . date("d.m.Y");
+    $randtitle = 'The Book ' . rand(1, 999);
+    $randdesc = 'This is a test description ' . rand(1, 999) . '. Date: ' . date("d.m.Y");
     $randrating = rand(0, 10);
     $is_top = rand(0, 1);
 
     $data = [
         'post_type' => 'books',
-        'post_category' => array(6),
         'post_name' => 'books',
         'post_title' => $randtitle,
         'post_content' => $randdesc,
@@ -26,10 +25,8 @@ function insert_books()
     ];
 
     $post_id = wp_insert_post($data, true);
-    if ($post_id) {
-        add_post_meta($post_id, '_rating_for_books', $randrating);
-        add_post_meta($post_id, '_top_for_books', $is_top);
-    }
+	update_post_meta($post_id, '_rating_for_books', $randrating);
+	update_post_meta($post_id, '_top_for_books', $is_top);
 }
 
 function test_plugin_activate()
@@ -76,7 +73,7 @@ function insert_book_category()
     wp_insert_term('Book Category', 'category', [
             'description' => 'This is a book category',
             'slug' => 'book-category'
-        ]
+	    ]
     );
 }
 
@@ -123,7 +120,7 @@ function rating_for_books_content($post)
 
 function rating_for_books_box_save($post_id)
 {
-    $rating = $_POST['rating_for_books'];
+    $rating = !empty($_POST['rating_for_books']) ? $_POST['rating_for_books'] : null;
     if (!isset($rating)) {
         $rating = 0;
     }
@@ -150,7 +147,7 @@ function top_for_books_content($post)
     $is_top = ((int)$value == 1) ? 'checked' : '';
 
     echo '<input type="checkbox" id="top_for_books" name="top_for_books" value="1"' . $is_top . '>
-          <label for="top_for_books">Top</label>';
+		<label for="top_for_books">Top</label>';
 }
 
 function top_for_books_box_save($post_id)
@@ -178,7 +175,18 @@ add_filter('the_title', 'display_top_for_books');
 //Deleting books on plugin deactivation
 function test_plugin_deactivate()
 {
+	$query = new WP_Query( array(
+		'post_type'   => 'books',
+		'post_status' => 'publish'
+	) );
 
+	while ( $query->have_posts() ) {
+		$query->the_post();
+		$post_id = get_the_ID();
+		wp_delete_post( $post_id, true );
+	}
+
+	do_action( 'test_plugin_deactivate' );
 }
 
 register_deactivation_hook( __FILE__, 'test_plugin_deactivate' );
