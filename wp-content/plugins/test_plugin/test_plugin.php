@@ -85,13 +85,17 @@ function fetch_books_shortcode()
 {
     $query = new WP_Query([
         'post_type' => 'books',
-        'posts_per_page' => 3
+        'posts_per_page' => 3,
+        'meta_key' => '_rating_for_books',
+        'orderby'   => 'meta_value',
+        'order' => 'DESC',
     ]);
 
     if ($query->have_posts()) {
         while ($query->have_posts()) {
             $query->the_post();
-            echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a></li>';
+            $rating = get_post_meta(get_the_ID(), '_rating_for_books', true);
+            echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br> Rating: <b>' . $rating . '</b></li>';
         }
     } else {
         echo 'Not found';
