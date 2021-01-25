@@ -7,6 +7,19 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
+require_once 'seeder.php';
+
+//Seeding books on plugin activation
+function test_plugin_activate()
+{
+    $i = 0;
+    while ($i++ <= 10) {
+        insert_books();
+    }
+    do_action('test_plugin_activate');
+}
+
+register_activation_hook( __FILE__, 'test_plugin_activate' );
 
 //Book post type
 function create_books_post_type()
@@ -139,3 +152,11 @@ function display_top_for_books ($title)
 }
 
 add_filter('the_title', 'display_top_for_books');
+
+//Deleting books on plugin deactivation
+function test_plugin_deactivate()
+{
+
+}
+
+register_deactivation_hook( __FILE__, 'test_plugin_deactivate' );
