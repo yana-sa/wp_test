@@ -7,12 +7,34 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
-require_once 'seeder.php';
 
 //Seeding books on plugin activation
+function insert_books()
+{
+    $randtitle = 'The Book ' . rand(1, 99);
+    $randdesc = 'This is a test description ' . rand(1, 99) . '. Date: ' . date("d.m.Y");
+    $randrating = rand(0, 10);
+    $is_top = rand(0, 1);
+
+    $data = [
+        'post_type' => 'books',
+        'post_category' => array(6),
+        'post_name' => 'books',
+        'post_title' => $randtitle,
+        'post_content' => $randdesc,
+        'post_status' => 'publish'
+    ];
+
+    $post_id = wp_insert_post($data, true);
+    if ($post_id) {
+        add_post_meta($post_id, '_rating_for_books', $randrating);
+        add_post_meta($post_id, '_top_for_books', $is_top);
+    }
+}
+
 function test_plugin_activate()
 {
-    $i = 0;
+    $i = 1;
     while ($i++ <= 10) {
         insert_books();
     }
