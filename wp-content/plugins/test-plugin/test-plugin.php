@@ -114,7 +114,7 @@ function top_for_books_content($post)
     $value = get_post_meta($post->ID, '_top_for_books', true);
     $is_top = ((int)$value == 1) ? 'checked' : '';
 
-    echo '<input formmethod="post" type="checkbox" id="top_for_books" name="top_for_books" value="1"' . $is_top . '>
+    echo '<input type="checkbox" id="top_for_books" name="top_for_books" value="1"' . $is_top . '>
           <label for="top_for_books">Top</label>';
 }
 
@@ -126,7 +126,7 @@ function top_for_books_box_save($post_id)
 
 add_action('save_post', 'top_for_books_box_save');
 
-function display_top_for_books ( $title )
+function display_top_for_books ($title)
 {
     global $post;
     $top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
@@ -134,9 +134,8 @@ function display_top_for_books ( $title )
     if (($top_for_books == '1') && !is_admin()) {
         $title = '&#11088' . $title;
         return $title;
-    } else {
-        return $title;
     }
+    return $title;
 }
 
 add_filter('the_title', 'display_top_for_books');
