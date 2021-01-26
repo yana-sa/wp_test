@@ -124,18 +124,7 @@ add_action( 'category_add_form_fields', 'select_main_book_box' );
 add_action( 'category_edit_form', 'select_main_book_box' );
 
 function select_main_book_box_save( $term_id ) {
-    if( !isset( $_POST['main_book'] ) )
-        return;
 
-    $stickies = get_option( 'main_page_cats' );
-
-    if( !is_array( $stickies ) )
-        $stickies = array( $term_id );
-
-    if( !in_array( $term_id, $stickies ) )
-        $stickies[] = $term_id;
-
-    update_option( 'main_page_cats', $stickies );
 }
 
 add_action( 'created_category', 'select_main_book_box_save' );
