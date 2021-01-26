@@ -22,12 +22,10 @@ function insert_books()
         'post_title' => $randtitle,
         'post_content' => $randdesc,
         'post_status' => 'publish',
-        'tax_input' => [
-            'category' => rand(4, 6)
-        ]
     ];
 
     $post_id = wp_insert_post($data, true);
+
     update_post_meta($post_id, '_rating_for_books', $randrating);
     update_post_meta($post_id, '_top_for_books', $is_top);
 }
@@ -57,11 +55,11 @@ function create_books_post_type()
             ],
             'public' => true,
             'has_archive' => true,
-            'rewrite' => array('slug' => 'books'),
+            'rewrite' => ['slug' => 'books'],
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
-            'taxonomies' => ['category', 'post_tag'],
+            'taxonomies' => ['book_category'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
             'register_meta_box_cb' => 'rating_for_books_box'
@@ -72,51 +70,52 @@ function create_books_post_type()
 add_action('init', 'create_books_post_type');
 
 //Create book categories
-function insert_book_categories()
+function create_book_categories()
 {
-    wp_insert_term('Fiction', 'category', [
-            'description' => 'One of the most popular genres of literature, fiction, features imaginary characters and events. This genre is often broken up into five subgenres: fantasy, historical fiction, contemporary fiction, mystery, and science fiction. Nonetheless, there are more than just five types of fiction, ranging from romance to graphic novels.',
-            'slug' => 'fiction',
-            'main_book' => 'none'
-        ]
-    );
-    wp_insert_term('Nonfiction', 'category', [
-            'description' => 'Unlike fiction, nonfiction tells the story of real people and events. Examples include biographies, autobiographies, or memoirs.',
-            'slug' => 'nonfiction',
-            'main_book' => 'none'
-        ]
-    );
-    wp_insert_term('Poetry', 'category', [
-            'description' => 'In this style of writing, words are arranged in a metrical pattern and often (though not always) in rhymed verse. Renowned poets include e.e. cummings, Robert Frost, and Maya Angelou.',
-            'slug' => 'poetry',
-            'main_book' => 'none'
-        ]
-    );
+    register_taxonomy('book_category', 'books', [
+        'hierarchical' => false,
+        'labels' => [
+            'name' => _x('Book Categories', 'taxonomy general name'),
+            'singular_name' => _x('Book Category', 'taxonomy singular name'),
+            'search_items' => __('Search Categories'),
+            'all_items' => __('All Categories'),
+            'edit_item' => __('Edit Category'),
+            'update_item' => __('Update Category'),
+            'add_new_item' => __('Add New Category'),
+            'new_item_name' => __('New Category Name'),
+            'menu_name' => __('Book Categories')],
+        'show_ui' => true,
+        'show_in_rest' => true,
+        'show_admin_column' => true,
+        'update_count_callback' => '_update_post_term_count',
+        'query_var' => true,
+        'rewrite' => ['slug' => 'book_category']
+    ]);
 }
 
-add_action('after_setup_theme', 'insert_book_categories');
+add_action('init', 'create_book_categories', 0);
 
-//Add meta box to categories admin menu
-function select_main_book_box($category)
+//Add meta box to books categories admin menu
+function select_main_book_box($book_category)
 {
     wp_reset_query();
     $args = ['post_type' => 'books',
         'tax_query' => [
-            'taxonomy' => 'category',
+            'taxonomy' => 'book_category',
             'field' => 'slug',
-            'terms' => $category->slug,
+            'terms' => $book_category->slug,
         ],
     ];
 
-    $main_book = get_option('main_book_' . $category->slug);
+    $main_book = get_option('main_book_' . $book_category->slug);
     $query = new WP_Query($args);
     if ($query->have_posts()) {
         echo '<div class="form-field">
                 <p>Please choose the main book for this category</p>
-                <label for="main_book"><b>Main book for "' . $category->name . '" category</b></label>
+                <label for="main_book"><b>Main book for "' . $book_category->name . '" category</b></label>
                 <select name="main_book" id="main_book">';
         while ($query->have_posts()) : $query->the_post();
-            if (in_category($category->term_id)) {
+            if (has_term($book_category->term_id, 'book_category')) {
                 if ($main_book == get_the_title()) {
                     echo '<option value="' . get_the_title() . '" selected>' . get_the_title() . '</option>';
                 } else {
@@ -128,30 +127,30 @@ function select_main_book_box($category)
     }
 }
 
-add_action('category_edit_form_fields', 'select_main_book_box');
+add_action('book_category_edit_form_fields', 'select_main_book_box');
 
 function select_main_book_box_save($term_id)
 {
     if (isset($_POST['main_book'])) {
-        $term_item = get_term($term_id, 'category');
+        $term_item = get_term($term_id, 'book_category');
         update_option('main_book_' . $term_item->slug, $_POST['main_book']);
     }
 }
 
-add_action('create_category', 'select_main_book_box_save');
-add_action('edited_category', 'select_main_book_box_save');
+add_action('create_book_category', 'select_main_book_box_save');
+add_action('edited_book_category', 'select_main_book_box_save');
 
 //Shortcode to show book categories
-function fetch_book_categories_shortcode($term_id)
+function fetch_book_categories_shortcode()
 {
     echo '<h3>Book Categories';
-    $terms = get_terms('category');
+    $terms = get_terms('book_category');
 
     foreach ($terms as $term) {
         wp_reset_query();
         $args = ['post_type' => 'books',
             'tax_query' => [
-                'taxonomy' => 'category',
+                'taxonomy' => 'book_category',
                 'field' => 'slug',
                 'terms' => $term->slug,
             ],
@@ -241,7 +240,7 @@ function top_for_books_content($post)
     $value = get_post_meta($post->ID, '_top_for_books', true);
     $is_top = ((int)$value == 1) ? 'checked' : '';
 
-    echo '<input type="checkbox" id="top_for_books" name="top_for_books" value="1"' . $is_top . '>
+    echo '<input type="checkbox" id="top_for_books" name="top_for_books" value="1" ' . $is_top . '>
 		<label for="top_for_books">Top</label>';
 }
 
