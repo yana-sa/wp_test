@@ -58,7 +58,7 @@ function create_books_post_type()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
-            'taxonomies' => ['category', 'post_tag'],
+            'taxonomies' => [ 'book_category', 'post_tag'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
             'register_meta_box_cb' => 'rating_for_books_box'
@@ -71,17 +71,17 @@ add_action('init', 'create_books_post_type');
 //Create book categories
 function insert_book_categories()
 {
-    wp_insert_term('Fiction', 'category', [
+    wp_insert_term('Fiction', 'book_category', [
             'description' => 'One of the most popular genres of literature, fiction, features imaginary characters and events. This genre is often broken up into five subgenres: fantasy, historical fiction, contemporary fiction, mystery, and science fiction. Nonetheless, there are more than just five types of fiction, ranging from romance to graphic novels.',
             'slug' => 'fiction'
         ]
     );
-    wp_insert_term('Nonfiction', 'category', [
+    wp_insert_term('Nonfiction', 'book_category', [
             'description' => 'Unlike fiction, nonfiction tells the story of real people and events. Examples include biographies, autobiographies, or memoirs.',
             'slug' => 'nonfiction'
         ]
     );
-    wp_insert_term('Poetry', 'category', [
+    wp_insert_term('Poetry', 'book_category', [
             'description' => 'In this style of writing, words are arranged in a metrical pattern and often (though not always) in rhymed verse. Renowned poets include e.e. cummings, Robert Frost, and Maya Angelou.',
             'slug' => 'poetry'
         ]
@@ -97,43 +97,63 @@ function display_category_select()
 }
 add_action( 'admin_menu', 'display_category_select' );
 
-function select_main_book_box()
+function select_main_book_box($category)
 {
-    if (is_admin()){
-    $query = new WP_Query([
-        'post_type' => 'books',
-        'category_in' => '4,5,6'
-    ]);
-    if ($query->have_posts()) {
-        while ($query->have_posts()) {
-            $query->the_post();
-            echo '<label for="main_book">Main book for "' . get_cat_name(4) . '" Category: </label>
-                    <select name="main_book" id="main_book">
-                    <option>' . get_the_title() . '</option>
-                    <option>None  </option>
-                    </select>';
+    $terms = get_terms('category');
+    foreach($terms as $term) {
+        wp_reset_query();
+        $args = array('post_type' => 'books',
+            'tax_query' => array(
+                array(
+                    'taxonomy' => 'category',
+                    'field' => 'slug',
+                    'terms' => $term->slug,
+                ),
+            ),
+        );
+        $loop = new WP_Query($args);
+        $term_slug = $term->slug;
+        $main_book = get_option('main_book_' . $term_slug);
+        if($loop->have_posts()) {
+            echo '<div class="form-field">
+                <p>Please choose the main book for this category</p>
+                <label for="main_book"><b>Main book: '.$term->name.'</b></label>
+                <select name="main_book" id="main_book">';
+            while($loop->have_posts()) : $loop->the_post();
+                if($main_book==get_the_title()) {
+                    echo '<option value="' . get_the_title() . '" selected>' . get_the_title() . '</option>';
+                } else {
+                    echo '<option value="' . get_the_title() . '">' . get_the_title() . '</option>';
+                }
+            endwhile;
+            echo '<option value="none">None</option></select></div>';
         }
-    } else {
-        echo 'Not found';
-    }
-    wp_reset_postdata();
     }
 }
 
-add_action( 'category_add_form_fields', 'select_main_book_box' );
-add_action( 'category_edit_form', 'select_main_book_box' );
+add_action( 'category_edit_form_fields', 'select_main_book_box' );
 
-function select_main_book_box_save( $term_id ) {
+function select_main_book_box_save( $term_id )
+{
 
+    if ( isset($_POST['main_book']) ) {
+        $term_item = get_term($term_id,'category');
+        $term_slug = $term_item->slug;
+
+        $main_book = sanitize_text_field($_POST['main_book']);
+
+        update_option('main_book_' . $term_slug, $main_book);
+    }
 }
 
-add_action( 'created_category', 'select_main_book_box_save' );
+add_action( 'create_category', 'select_main_book_box_save' );
 add_action( 'edited_category', 'select_main_book_box_save' );
 
 //Shortcode to show book categories
 function fetch_book_categories_shortcode()
 {
     wp_list_categories('orderby=name&include=4,5,6');
+    get_term($main_book,$category);
 }
 
 add_shortcode('fetched_book_categories', 'fetch_book_categories_shortcode');
