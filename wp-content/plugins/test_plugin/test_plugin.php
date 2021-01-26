@@ -58,7 +58,7 @@ function create_books_post_type()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
-            'taxonomies' => [ 'book_category', 'post_tag'],
+            'taxonomies' => [ 'category', 'post_tag'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
             'register_meta_box_cb' => 'rating_for_books_box'
@@ -71,17 +71,17 @@ add_action('init', 'create_books_post_type');
 //Create book categories
 function insert_book_categories()
 {
-    wp_insert_term('Fiction', 'book_category', [
+    wp_insert_term('Fiction', 'category', [
             'description' => 'One of the most popular genres of literature, fiction, features imaginary characters and events. This genre is often broken up into five subgenres: fantasy, historical fiction, contemporary fiction, mystery, and science fiction. Nonetheless, there are more than just five types of fiction, ranging from romance to graphic novels.',
             'slug' => 'fiction'
         ]
     );
-    wp_insert_term('Nonfiction', 'book_category', [
+    wp_insert_term('Nonfiction', 'category', [
             'description' => 'Unlike fiction, nonfiction tells the story of real people and events. Examples include biographies, autobiographies, or memoirs.',
             'slug' => 'nonfiction'
         ]
     );
-    wp_insert_term('Poetry', 'book_category', [
+    wp_insert_term('Poetry', 'category', [
             'description' => 'In this style of writing, words are arranged in a metrical pattern and often (though not always) in rhymed verse. Renowned poets include e.e. cummings, Robert Frost, and Maya Angelou.',
             'slug' => 'poetry'
         ]
@@ -111,9 +111,10 @@ function select_main_book_box($category)
                 ),
             ),
         );
-        $loop = new WP_Query($args);
         $term_slug = $term->slug;
         $main_book = get_option('main_book_' . $term_slug);
+
+        $loop = new WP_Query($args);
         if($loop->have_posts()) {
             echo '<div class="form-field">
                 <p>Please choose the main book for this category</p>
@@ -153,7 +154,6 @@ add_action( 'edited_category', 'select_main_book_box_save' );
 function fetch_book_categories_shortcode()
 {
     wp_list_categories('orderby=name&include=4,5,6');
-    get_term($main_book,$category);
 }
 
 add_shortcode('fetched_book_categories', 'fetch_book_categories_shortcode');
