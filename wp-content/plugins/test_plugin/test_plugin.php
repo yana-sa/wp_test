@@ -23,7 +23,7 @@ function insert_books()
         'post_content' => $randdesc,
         'post_status' => 'publish',
         'tax_input' => [
-            'category' => rand(4,6)
+            'category' => rand(4, 6)
         ]
     ];
 
@@ -144,6 +144,7 @@ add_action('edited_category', 'select_main_book_box_save');
 //Shortcode to show book categories
 function fetch_book_categories_shortcode($term_id)
 {
+    echo '<h3>Book Categories';
     $terms = get_terms('category');
 
     foreach ($terms as $term) {
@@ -160,7 +161,7 @@ function fetch_book_categories_shortcode($term_id)
         if ($query->have_posts()) {
             echo '<h4>' . $term->name . '</h4>';
             $main_book = get_option('main_book_' . $term->slug);
-            if (!empty($main_book)){
+            if (!empty($main_book)) {
                 echo '<li><a href="' . get_permalink($main_book) . '">Main book: "' . $main_book . '"</a></li>';
             }
         }
