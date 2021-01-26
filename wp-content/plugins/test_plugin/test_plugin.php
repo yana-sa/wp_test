@@ -21,7 +21,7 @@ function insert_books()
         'post_name' => 'books',
         'post_title' => $randtitle,
         'post_content' => $randdesc,
-        'post_status' => 'publish'
+        'post_status' => 'publish',
     ];
 
     $post_id = wp_insert_post($data, true);
@@ -68,17 +68,86 @@ function create_books_post_type()
 
 add_action('init', 'create_books_post_type');
 
-//Book Category
-function insert_book_category()
+//Create book categories
+function insert_book_categories()
 {
-    wp_insert_term('Book Category', 'category', [
-            'description' => 'This is a book category',
-            'slug' => 'book-category'
+    wp_insert_term('Fiction', 'category', [
+            'description' => 'One of the most popular genres of literature, fiction, features imaginary characters and events. This genre is often broken up into five subgenres: fantasy, historical fiction, contemporary fiction, mystery, and science fiction. Nonetheless, there are more than just five types of fiction, ranging from romance to graphic novels.',
+            'slug' => 'fiction'
+        ]
+    );
+    wp_insert_term('Nonfiction', 'category', [
+            'description' => 'Unlike fiction, nonfiction tells the story of real people and events. Examples include biographies, autobiographies, or memoirs.',
+            'slug' => 'nonfiction'
+        ]
+    );
+    wp_insert_term('Poetry', 'category', [
+            'description' => 'In this style of writing, words are arranged in a metrical pattern and often (though not always) in rhymed verse. Renowned poets include e.e. cummings, Robert Frost, and Maya Angelou.',
+            'slug' => 'poetry'
         ]
     );
 }
 
-add_action('after_setup_theme', 'insert_book_category');
+add_action('after_setup_theme', 'insert_book_categories');
+
+//Add meta box to categories admin menu
+function display_category_select()
+{
+    add_meta_box('main_book', 'Main book', 'select_main_book_box', 'books');
+}
+add_action( 'admin_menu', 'display_category_select' );
+
+function select_main_book_box()
+{
+    if (is_admin()){
+    $query = new WP_Query([
+        'post_type' => 'books',
+        'category_in' => '4,5,6'
+    ]);
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            echo '<label for="main_book">Main book for "' . get_cat_name(4) . '" Category: </label>
+                    <select name="main_book" id="main_book">
+                    <option>' . get_the_title() . '</option>
+                    <option>None  </option>
+                    </select>';
+        }
+    } else {
+        echo 'Not found';
+    }
+    wp_reset_postdata();
+    }
+}
+
+add_action( 'category_add_form_fields', 'select_main_book_box' );
+add_action( 'category_edit_form', 'select_main_book_box' );
+
+function select_main_book_box_save( $term_id ) {
+    if( !isset( $_POST['main_book'] ) )
+        return;
+
+    $stickies = get_option( 'main_page_cats' );
+
+    if( !is_array( $stickies ) )
+        $stickies = array( $term_id );
+
+    if( !in_array( $term_id, $stickies ) )
+        $stickies[] = $term_id;
+
+    update_option( 'main_page_cats', $stickies );
+}
+
+add_action( 'created_category', 'select_main_book_box_save' );
+add_action( 'edited_category', 'select_main_book_box_save' );
+
+//Shortcode to show book categories
+function fetch_book_categories_shortcode()
+{
+    wp_list_categories('orderby=name&include=4,5,6');
+}
+
+add_shortcode('fetched_book_categories', 'fetch_book_categories_shortcode');
 
 //Shortcode to show recently added books
 function fetch_books_shortcode()
