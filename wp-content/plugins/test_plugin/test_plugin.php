@@ -22,6 +22,9 @@ function insert_books()
         'post_title' => $randtitle,
         'post_content' => $randdesc,
         'post_status' => 'publish',
+        'tax_input' => [
+            'category' => rand(4,6)
+        ]
     ];
 
     $post_id = wp_insert_post($data, true);
@@ -58,7 +61,7 @@ function create_books_post_type()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
-            'taxonomies' => [ 'category', 'post_tag'],
+            'taxonomies' => ['category', 'post_tag'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
             'register_meta_box_cb' => 'rating_for_books_box'
@@ -73,17 +76,20 @@ function insert_book_categories()
 {
     wp_insert_term('Fiction', 'category', [
             'description' => 'One of the most popular genres of literature, fiction, features imaginary characters and events. This genre is often broken up into five subgenres: fantasy, historical fiction, contemporary fiction, mystery, and science fiction. Nonetheless, there are more than just five types of fiction, ranging from romance to graphic novels.',
-            'slug' => 'fiction'
+            'slug' => 'fiction',
+            'main_book' => 'none'
         ]
     );
     wp_insert_term('Nonfiction', 'category', [
             'description' => 'Unlike fiction, nonfiction tells the story of real people and events. Examples include biographies, autobiographies, or memoirs.',
-            'slug' => 'nonfiction'
+            'slug' => 'nonfiction',
+            'main_book' => 'none'
         ]
     );
     wp_insert_term('Poetry', 'category', [
             'description' => 'In this style of writing, words are arranged in a metrical pattern and often (though not always) in rhymed verse. Renowned poets include e.e. cummings, Robert Frost, and Maya Angelou.',
-            'slug' => 'poetry'
+            'slug' => 'poetry',
+            'main_book' => 'none'
         ]
     );
 }
@@ -91,69 +97,74 @@ function insert_book_categories()
 add_action('after_setup_theme', 'insert_book_categories');
 
 //Add meta box to categories admin menu
-function display_category_select()
-{
-    add_meta_box('main_book', 'Main book', 'select_main_book_box', 'books');
-}
-add_action( 'admin_menu', 'display_category_select' );
-
 function select_main_book_box($category)
 {
-    $terms = get_terms('category');
-    foreach($terms as $term) {
-        wp_reset_query();
-        $args = array('post_type' => 'books',
-            'tax_query' => array(
-                array(
-                    'taxonomy' => 'category',
-                    'field' => 'slug',
-                    'terms' => $term->slug,
-                ),
-            ),
-        );
-        $term_slug = $term->slug;
-        $main_book = get_option('main_book_' . $term_slug);
+    wp_reset_query();
+    $args = ['post_type' => 'books',
+        'tax_query' => [
+            'taxonomy' => 'category',
+            'field' => 'slug',
+            'terms' => $category->slug,
+        ],
+    ];
 
-        $loop = new WP_Query($args);
-        if($loop->have_posts()) {
-            echo '<div class="form-field">
+    $main_book = get_option('main_book_' . $category->slug);
+    $query = new WP_Query($args);
+    if ($query->have_posts()) {
+        echo '<div class="form-field">
                 <p>Please choose the main book for this category</p>
-                <label for="main_book"><b>Main book: '.$term->name.'</b></label>
+                <label for="main_book"><b>Main book for "' . $category->name . '" category</b></label>
                 <select name="main_book" id="main_book">';
-            while($loop->have_posts()) : $loop->the_post();
-                if($main_book==get_the_title()) {
+        while ($query->have_posts()) : $query->the_post();
+            if (in_category($category->term_id)) {
+                if ($main_book == get_the_title()) {
                     echo '<option value="' . get_the_title() . '" selected>' . get_the_title() . '</option>';
                 } else {
                     echo '<option value="' . get_the_title() . '">' . get_the_title() . '</option>';
                 }
-            endwhile;
-            echo '<option value="none">None</option></select></div>';
-        }
+            }
+        endwhile;
+        echo '<option value="none">None</option></select></div>';
     }
 }
 
-add_action( 'category_edit_form_fields', 'select_main_book_box' );
+add_action('category_edit_form_fields', 'select_main_book_box');
 
-function select_main_book_box_save( $term_id )
+function select_main_book_box_save($term_id)
 {
-
-    if ( isset($_POST['main_book']) ) {
-        $term_item = get_term($term_id,'category');
-        $term_slug = $term_item->slug;
-
-        $main_book = sanitize_text_field($_POST['main_book']);
-
-        update_option('main_book_' . $term_slug, $main_book);
+    if (isset($_POST['main_book'])) {
+        $term_item = get_term($term_id, 'category');
+        update_option('main_book_' . $term_item->slug, $_POST['main_book']);
     }
 }
 
-add_action( 'create_category', 'select_main_book_box_save' );
-add_action( 'edited_category', 'select_main_book_box_save' );
+add_action('create_category', 'select_main_book_box_save');
+add_action('edited_category', 'select_main_book_box_save');
 
 //Shortcode to show book categories
-function fetch_book_categories_shortcode()
+function fetch_book_categories_shortcode($term_id)
 {
-    wp_list_categories('orderby=name&include=4,5,6');
+    $terms = get_terms('category');
+
+    foreach ($terms as $term) {
+        wp_reset_query();
+        $args = ['post_type' => 'books',
+            'tax_query' => [
+                'taxonomy' => 'category',
+                'field' => 'slug',
+                'terms' => $term->slug,
+            ],
+        ];
+
+        $query = new WP_Query($args);
+        if ($query->have_posts()) {
+            echo '<h4>' . $term->name . '</h4>';
+            $main_book = get_option('main_book_' . $term->slug);
+            if (!empty($main_book)){
+                echo '<li><a href="' . get_permalink($main_book) . '">Main book: "' . $main_book . '"</a></li>';
+            }
+        }
+    }
 }
 
 add_shortcode('fetched_book_categories', 'fetch_book_categories_shortcode');
@@ -165,7 +176,7 @@ function fetch_books_shortcode()
         'post_type' => 'books',
         'posts_per_page' => 3,
         'meta_key' => '_rating_for_books',
-        'orderby'   => 'meta_value',
+        'orderby' => 'meta_value',
         'order' => 'DESC',
     ]);
 
