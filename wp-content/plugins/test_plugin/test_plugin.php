@@ -110,13 +110,10 @@ function select_main_book_box($book_category)
                 <p>Please choose the main book for this category</p>
                 <label for="main_book"><b>Main book for "' . $book_category->name . '" category</b></label>
                 <select name="main_book" id="main_book">';
-        while ($query->have_posts()) : $query->the_post();
-            if ($main_book == get_the_ID()) {
-                echo '<option value="' . get_the_ID() . '" selected>' . get_the_title() . '</option>';
-            } else {
-                echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-            }
-        endwhile;
+        while ($query->have_posts()) {
+            $query->the_post();
+            echo '<option value="' . get_the_ID() . '" ' . ($main_book == get_the_ID() ? "selected" : "") . '>' . get_the_title() . '</option>';
+        }
         echo '<option value="none">None</option></select></div>';
     }
 }
