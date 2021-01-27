@@ -112,9 +112,9 @@ function select_main_book_box($book_category)
                 <select name="main_book" id="main_book">';
         while ($query->have_posts()) : $query->the_post();
                 if ($main_book == get_the_title()) {
-                    echo '<option value="' . get_the_title() . '" selected>' . get_the_title() . '</option>';
+                    echo '<option value="' . get_the_ID() . '" selected>' . get_the_title() . '</option>';
                 } else {
-                    echo '<option value="' . get_the_title() . '">' . get_the_title() . '</option>';
+                    echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
                 }
         endwhile;
         echo '<option value="none">None</option></select></div>';
@@ -151,9 +151,12 @@ function fetch_book_categories_shortcode()
             echo '<h4>' . $category->name . '</h4>';
 
             $main_book = get_option('main_book_' . $category->slug);
-            if (!empty($main_book)) {
-                    echo '<li><a href="' . get_permalink() . '">Main book: "' . $main_book . '"</a></li>';
+            if ($main_book == get_the_ID()) {
+                    echo '<li><a href="' . get_permalink() . '">Main book: "' . get_the_title() . '"</a></li>';
             }
+            $id = get_the_ID();
+            var_dump($id);
+            var_dump($main_book);
         }
     }
 }
