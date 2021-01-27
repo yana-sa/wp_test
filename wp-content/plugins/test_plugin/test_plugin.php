@@ -100,11 +100,7 @@ function select_main_book_box($book_category)
 {
     wp_reset_query();
     $args = ['post_type' => 'books',
-        'tax_query' => [
-            'taxonomy' => 'book_category',
-            'field' => 'slug',
-            'terms' => $book_category->slug,
-        ],
+        'book_category' => $book_category->slug
     ];
 
     $main_book = get_option('main_book_' . $book_category->slug);
@@ -115,13 +111,11 @@ function select_main_book_box($book_category)
                 <label for="main_book"><b>Main book for "' . $book_category->name . '" category</b></label>
                 <select name="main_book" id="main_book">';
         while ($query->have_posts()) : $query->the_post();
-            if (has_term($book_category->term_id, 'book_category')) {
                 if ($main_book == get_the_title()) {
                     echo '<option value="' . get_the_title() . '" selected>' . get_the_title() . '</option>';
                 } else {
                     echo '<option value="' . get_the_title() . '">' . get_the_title() . '</option>';
                 }
-            }
         endwhile;
         echo '<option value="none">None</option></select></div>';
     }
@@ -144,24 +138,21 @@ add_action('edited_book_category', 'select_main_book_box_save');
 function fetch_book_categories_shortcode()
 {
     echo '<h3>Book Categories';
-    $terms = get_terms('book_category');
-
-    foreach ($terms as $term) {
+    $categories = get_terms('book_category');
+    foreach ($categories as $category) {
         wp_reset_query();
         $args = ['post_type' => 'books',
-            'tax_query' => [
-                'taxonomy' => 'book_category',
-                'field' => 'slug',
-                'terms' => $term->slug,
-            ],
+                'book_category' => $category->slug,
         ];
 
         $query = new WP_Query($args);
         if ($query->have_posts()) {
-            echo '<h4>' . $term->name . '</h4>';
-            $main_book = get_option('main_book_' . $term->slug);
+            $query->the_post();
+            echo '<h4>' . $category->name . '</h4>';
+
+            $main_book = get_option('main_book_' . $category->slug);
             if (!empty($main_book)) {
-                echo '<li><a href="' . get_permalink($main_book) . '">Main book: "' . $main_book . '"</a></li>';
+                    echo '<li><a href="' . get_permalink() . '">Main book: "' . $main_book . '"</a></li>';
             }
         }
     }
