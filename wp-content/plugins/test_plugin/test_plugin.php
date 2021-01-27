@@ -111,11 +111,11 @@ function select_main_book_box($book_category)
                 <label for="main_book"><b>Main book for "' . $book_category->name . '" category</b></label>
                 <select name="main_book" id="main_book">';
         while ($query->have_posts()) : $query->the_post();
-                if ($main_book == get_the_title()) {
-                    echo '<option value="' . get_the_ID() . '" selected>' . get_the_title() . '</option>';
-                } else {
-                    echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
-                }
+            if ($main_book == get_the_ID()) {
+                echo '<option value="' . get_the_ID() . '" selected>' . get_the_title() . '</option>';
+            } else {
+                echo '<option value="' . get_the_ID() . '">' . get_the_title() . '</option>';
+            }
         endwhile;
         echo '<option value="none">None</option></select></div>';
     }
@@ -142,21 +142,18 @@ function fetch_book_categories_shortcode()
     foreach ($categories as $category) {
         wp_reset_query();
         $args = ['post_type' => 'books',
-                'book_category' => $category->slug,
+            'book_category' => $category->slug,
         ];
 
         $query = new WP_Query($args);
-        if ($query->have_posts()) {
-            $query->the_post();
-            echo '<h4>' . $category->name . '</h4>';
+        echo '<h4>' . $category->name . '</h4>';
 
+        while ($query->have_posts()) {
+            $query->the_post();
             $main_book = get_option('main_book_' . $category->slug);
             if ($main_book == get_the_ID()) {
-                    echo '<li><a href="' . get_permalink() . '">Main book: "' . get_the_title() . '"</a></li>';
+                echo '<li><a href="' . get_permalink() . '">Main book: "' . get_the_title() . '"</a></li>';
             }
-            $id = get_the_ID();
-            var_dump($id);
-            var_dump($main_book);
         }
     }
 }
