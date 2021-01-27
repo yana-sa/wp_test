@@ -136,22 +136,12 @@ function fetch_book_categories_shortcode()
 {
     echo '<h3>Book Categories';
     $categories = get_terms('book_category');
+
     foreach ($categories as $category) {
-        wp_reset_query();
-        $args = ['post_type' => 'books',
-            'book_category' => $category->slug,
-        ];
-
-        $query = new WP_Query($args);
         echo '<h4>' . $category->name . '</h4>';
-
-        while ($query->have_posts()) {
-            $query->the_post();
-            $main_book = get_option('main_book_' . $category->slug);
-            if ($main_book == get_the_ID()) {
-                echo '<li><a href="' . get_permalink() . '">Main book: "' . get_the_title() . '"</a></li>';
-            }
-        }
+        $main_book = get_option('main_book_' . $category->slug);
+        $book = get_post($main_book);
+        echo '<li><a href="' . get_permalink($book) . '">Main book: "' . get_the_title($book) . '"</a></li>';
     }
 }
 
