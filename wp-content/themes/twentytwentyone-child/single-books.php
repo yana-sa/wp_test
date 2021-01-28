@@ -26,12 +26,20 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
 
 		wp_link_pages(
 			array(
-				'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Page', 'twentytwentyone' ) . '">',
+				'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Post', 'twentytwentyone-child' ) . '">',
 				'after'    => '</nav>',
 				/* translators: %: page number. */
-				'pagelink' => esc_html__( 'Page %', 'twentytwentyone' ),
+				'postlink' => esc_html__( 'Post %', 'twentytwentyone-child' ),
 			)
 		); ?>
+        <div class="entry-content alignwide">
+            <?php
+            $link = admin_url('admin-ajax.php?action=book_post_evaluation&post_id='.$post->ID);
+
+            echo '<a value="like" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128077</a>  ';
+            echo '<a value="dislike" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128078</a>';
+            ?>
+        </div>
 	</div><!-- .entry-content -->
 
 	<footer class="entry-footer default-max-width">

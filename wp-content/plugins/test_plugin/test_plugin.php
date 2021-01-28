@@ -28,6 +28,7 @@ function insert_books()
 
     update_post_meta($post_id, '_rating_for_books', $randrating);
     update_post_meta($post_id, '_top_for_books', $is_top);
+    update_post_meta($post_id, '_book_evaluation', null);
 }
 
 function test_plugin_activate()
@@ -40,6 +41,33 @@ function test_plugin_activate()
 }
 
 register_activation_hook(__FILE__, 'test_plugin_activate');
+
+function create_book_evaluation_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'book_evaluation';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		  user_id BIGINT UNSIGNED NOT NULL,
+		  post_id BIGINT UNSIGNED NOT NULL,
+		  action VARCHAR (50),
+		  time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+		  UNIQUE KEY id (id),
+		  
+		FOREIGN KEY (user_id) REFERENCES wp_users(ID)
+        ON DELETE CASCADE,
+		FOREIGN KEY (post_id) REFERENCES wp_posts(ID)
+		ON DELETE CASCADE
+		) $charset_collate;
+		";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+register_activation_hook( __FILE__, 'create_book_evaluation_table' );
 
 //Book post type
 function create_books_post_type()
@@ -95,6 +123,41 @@ function create_book_categories()
 
 add_action('init', 'create_book_categories', 0);
 
+//Add evaluation to book posts
+function book_post_evaluation()
+{
+    if ( is_user_logged_in() ) {
+        $user_id = get_current_user_id();
+
+        $rating = get_post_meta($_REQUEST["post_id"], "_rating_for_books", true);
+        if ($_POST['evaluation'] == 'like') {
+            $new_rating = $rating + 1;
+        }elseif ($_POST['evaluation'] == 'dislike') {
+            $new_rating = $rating - 1;
+        }
+        return $new_rating;
+
+        $like = update_post_meta($_REQUEST["post_id"], "_rating_for_books", $new_rating);
+
+        if ($like === false) {
+            $result['type'] = "error";
+            $result['rating_for_books'] = $rating;
+        } else {
+            $result['type'] = "success";
+            $result['rating_for_books'] = $new_rating;
+        }
+
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $result = json_encode($result);
+            echo $result;
+        } else {
+            header("Location: " . $_SERVER["HTTP_REFERER"]);
+        }
+    }
+}
+
+add_action( 'wp_ajax_book_post_evaluation', 'book_post_evaluation' );
+
 //Add meta box to books categories admin menu
 function select_main_book_box($book_category)
 {
@@ -116,6 +179,7 @@ function select_main_book_box($book_category)
         }
         echo '<option value="none">None</option></select></div>';
     }
+
 }
 
 add_action('book_category_edit_form_fields', 'select_main_book_box');
@@ -264,3 +328,16 @@ function test_plugin_deactivate()
 }
 
 register_deactivation_hook(__FILE__, 'test_plugin_deactivate');
+
+function drop_book_evaluation_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'book_evaluation';
+
+    $sql = "DROP TABLE IF EXISTS $table_name;";
+    $wpdb->query($sql);
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+}
+
+register_deactivation_hook(__FILE__, 'drop_book_evaluation_table');

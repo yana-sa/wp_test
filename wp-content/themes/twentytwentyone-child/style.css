@@ -8,3 +8,35 @@ Template: twentytwentyone
 Version: 1.0.0
 Text Domain: twentytwentyone-child
 */
+
+.like-button {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    color: #9c0000f0;
+    font-size: 15px;
+    padding: 20px;
+    background-color: #f7aaaaf0;
+    border: solid #9c0000f0 1px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.like-button:hover, .button-demo:active {
+    background-color: #610000f0;
+}
+
+.dislike-button {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    color: #f7aaaaf0;
+    font-size: 15px;
+    padding: 20px;
+    background-color: #9c0000f0;
+    border: solid #f7aaaaf0 1px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.dislike-button:hover, .button-demo:active {
+    background-color: #ffe4e4f0;
+}
