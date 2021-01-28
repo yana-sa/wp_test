@@ -129,21 +129,38 @@ function book_post_evaluation()
     global $wpdb;
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
-        $post_id = $_REQUEST["post_id"];
-        $sql = $wpdb->get_results( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id'" );;
+        $post_id = get_the_ID();
+        $post_data = $_POST['evaluation'];
+        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
         $action = $sql['action'];
 
-        $rating = get_post_meta($_REQUEST["post_id"], "_rating_for_books", true);
+        $rating = get_post_meta($post_id, "_rating_for_books", true);
 
-        if ($_POST['evaluation'] == 'like') {
-            $new_rating = $rating + 1;
-            $like = update_post_meta($post_id, "_rating_for_books", $new_rating);
-        }elseif ($_POST['evaluation'] == 'dislike') {
-            $new_rating = $rating - 1;
-            $like = update_post_meta($post_id, "_rating_for_books", $new_rating);
+        if (empty($action)) {
+            if ($post_data == 'like') {
+                $new_rating = $rating + 1;
+            } elseif ($post_data == 'dislike') {
+                $new_rating = $rating - 1;
+            }
+            $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
+        } elseif ($action == 'like') {
+            if ($_POST['evaluation'] == 'like') {
+                echo 'You have already liked this post';
+            } elseif ($_POST['evaluation'] == 'dislike') {
+                $new_rating = $rating - 1;
+                $wpdb->update( 'wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
+            }
+        } elseif ($action == 'dislike') {
+            if ($_POST['evaluation'] == 'like') {
+                $new_rating = $rating + 1;
+                $wpdb->update( 'wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
+            } elseif ($_POST['evaluation'] == 'dislike') {
+                echo 'You have already liked this post';
+            }
         }
+        $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
 
-        if ($like === false) {
+        if ($evaluation === false) {
             $result['type'] = "error";
             $result['rating_for_books'] = $rating;
         } else {

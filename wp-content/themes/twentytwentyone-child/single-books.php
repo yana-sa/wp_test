@@ -24,6 +24,13 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
 		<?php
 		the_content();
 
+        global $wpdb;
+        $user_id = get_current_user_id();
+        $post_id = get_the_ID();
+        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
+        $action = $sql['action'];
+        echo $action;
+
 		wp_link_pages(
 			array(
 				'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Post', 'twentytwentyone-child' ) . '">',
