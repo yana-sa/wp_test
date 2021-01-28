@@ -4,4 +4,3 @@ jQuery(document).ready(function(){
         jQuery("p").text("jQuery is still working!");
     });
 });
-//?????

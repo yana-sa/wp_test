@@ -17,12 +17,17 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
 	</header>
 
     <div class="entry-content alignwide"><?php
-        echo "<h4>Rating: $rating_for_books"; ?>
+        echo "<p id='rating_for_books'><h4>Rating: $rating_for_books</p>"; ?>
     </div>
 
 	<div class="entry-content">
 		<?php
 		the_content();
+
+        global $wpdb;
+        $user_id = get_current_user_id();
+        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id'", ARRAY_A );
+        echo $sql['action'];
 
 		wp_link_pages(
 			array(
@@ -36,8 +41,8 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
             <?php
             $link = admin_url('admin-ajax.php?action=book_post_evaluation&post_id='.$post->ID);
 
-            echo '<a value="like" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128077</a>  ';
-            echo '<a value="dislike" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128078</a>';
+            echo '<a value="like" class="book_post_evaluation" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128077</a>  ';
+            echo '<a value="dislike" class="book_post_evaluation" style="font-size:50px" id="evaluation" data-post_id="' . $post->ID . '" href="' . $link . '">&#128078</a>';
             ?>
         </div>
 	</div><!-- .entry-content -->

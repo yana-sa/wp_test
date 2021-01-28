@@ -126,18 +126,22 @@ add_action('init', 'create_book_categories', 0);
 //Add evaluation to book posts
 function book_post_evaluation()
 {
+    global $wpdb;
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
+        $post_id = $_REQUEST["post_id"];
+        $sql = $wpdb->get_results( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id'" );;
+        $action = $sql['action'];
 
         $rating = get_post_meta($_REQUEST["post_id"], "_rating_for_books", true);
+
         if ($_POST['evaluation'] == 'like') {
             $new_rating = $rating + 1;
+            $like = update_post_meta($post_id, "_rating_for_books", $new_rating);
         }elseif ($_POST['evaluation'] == 'dislike') {
             $new_rating = $rating - 1;
+            $like = update_post_meta($post_id, "_rating_for_books", $new_rating);
         }
-        return $new_rating;
-
-        $like = update_post_meta($_REQUEST["post_id"], "_rating_for_books", $new_rating);
 
         if ($like === false) {
             $result['type'] = "error";
@@ -157,6 +161,16 @@ function book_post_evaluation()
 }
 
 add_action( 'wp_ajax_book_post_evaluation', 'book_post_evaluation' );
+
+function script_enqueue() {
+
+    wp_register_script( "book_likes", plugin_dir_url(__FILE__).'book_likes.js', array('jquery') );
+    wp_localize_script( 'book_likes', 'myAjax', ['ajaxurl' => admin_url( 'admin-ajax.php' )]);
+
+    wp_enqueue_script( 'jquery' );
+    wp_enqueue_script( 'book_likes' );
+}
+add_action( 'init', 'script_enqueue' );
 
 //Add meta box to books categories admin menu
 function select_main_book_box($book_category)
