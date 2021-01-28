@@ -129,7 +129,7 @@ function book_post_evaluation()
     global $wpdb;
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
-        $post_id = get_the_ID();
+        $post_id = $_REQUEST['post_id'];
         $post_data = $_POST['evaluation'];
         $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
         $action = $sql['action'];
