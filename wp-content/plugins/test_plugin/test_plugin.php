@@ -143,20 +143,13 @@ function book_post_evaluation()
                 $new_rating = $rating - 1;
             }
             $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
-        } elseif ($action == 'like') {
-            if ($_POST['evaluation'] == 'like') {
-                echo 'You have already liked this post';
-            } elseif ($_POST['evaluation'] == 'dislike') {
-                $new_rating = $rating - 1;
-                $wpdb->update( 'wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
+        } else {
+            if ($post_data == 'like') {
+                $new_rating = $rating + 2;
+            } elseif ($post_data == 'dislike') {
+                $new_rating = $rating - 2;
             }
-        } elseif ($action == 'dislike') {
-            if ($_POST['evaluation'] == 'like') {
-                $new_rating = $rating + 1;
-                $wpdb->update( 'wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
-            } elseif ($_POST['evaluation'] == 'dislike') {
-                echo 'You have already liked this post';
-            }
+            $wpdb->update('wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
         }
         $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
 
