@@ -125,18 +125,15 @@ add_action('init', 'create_book_categories', 0);
 //Add evaluation to book posts
 function book_post_evaluation()
 {
-    var_dump($_GET);
-
     global $wpdb;
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
         $post_data = $_POST['evaluation'];
-        $sql = $wpdb->get_col( "SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
+        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = $user_id AND post_id = '$post_id'", ARRAY_A);;
         $action = $sql['action'];
 
         $rating = get_post_meta($post_id, "_rating_for_books", true);
-
         if (empty($action)) {
             if ($post_data == 'like') {
                 $new_rating = $rating + 1;
@@ -145,10 +142,9 @@ function book_post_evaluation()
                 $new_rating = $rating - 1;
                 $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
             }
-            var_dump($_POST['evaluation']);
             $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
         } else {
-            echo 'You have already liked this post';
+            echo 'You have already rated this post';
         }
 
         if ($evaluation === false) {
@@ -162,7 +158,6 @@ function book_post_evaluation()
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             $result = json_encode($result);
             echo $result;
-            var_dump($_REQUEST['evaluation']);
         } else {
             header("Location: " . $_SERVER["HTTP_REFERER"]);
         }
