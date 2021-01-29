@@ -142,7 +142,7 @@ function book_post_evaluation()
                     $new_rating = $rating - 1;
                     break;
                 default:
-                    echo 'Something went wrong :(';
+                    $message = 'Something went wrong!';
             }
             if (!empty($new_rating)) {
                 $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
@@ -152,20 +152,26 @@ function book_post_evaluation()
             echo 'You have already rated this post';
         }
 
-        if ($rating_update === false) {
-            $result['type'] = 'error';
-            $result['rating_for_books'] = $rating;
-        } else {
-            $result['type'] = 'success';
-            $result['rating_for_books'] = $new_rating;
-        }
+    } else {
+        $message = 'You are not logged in!';
+        $status = 'error';
+    }
 
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            $result = json_encode($result);
-            echo $result;
-        } else {
-            header('Location: ' . $_SERVER['HTTP_REFERER']);
-        }
+    if ($rating_update === false) {
+        $status = 'error';
+        $result['rating_for_books'] = $rating;
+        $result['message'] = $message;
+    } else {
+        $status = 'success';
+        $result['rating_for_books'] = $new_rating;
+    }
+
+    $result['status'] = $status;
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        $result = json_encode($result);
+        echo $result;
+    } else {
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
 }
 
@@ -173,7 +179,6 @@ add_action('wp_ajax_book_post_evaluation', 'book_post_evaluation');
 
 function script_enqueue()
 {
-
     wp_register_script('book_likes', plugin_dir_url(__FILE__) . 'book_likes.js', array('jquery'));
     wp_localize_script('book_likes', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
 
