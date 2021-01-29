@@ -66,7 +66,7 @@ function create_book_evaluation_table()
     dbDelta($sql);
 }
 
-register_activation_hook( __FILE__, 'create_book_evaluation_table' );
+register_activation_hook(__FILE__, 'create_book_evaluation_table');
 
 //Book post type
 function create_books_post_type()
@@ -126,22 +126,26 @@ add_action('init', 'create_book_categories', 0);
 function book_post_evaluation()
 {
     global $wpdb;
-    if ( is_user_logged_in() ) {
+    if (is_user_logged_in()) {
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
         $evaluation = $_POST['evaluation'];
-        $is_eval = $wpdb->get_col( "SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
+        $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
 
         $rating = get_post_meta($post_id, "_rating_for_books", true);
         if (empty($is_eval)) {
-            if ($evaluation == 'like') {
-                $new_rating = $rating + 1;
-                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
-            } elseif ($evaluation == 'dislike') {
-                $new_rating = $rating - 1;
-                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
+            switch ($evaluation) {
+                case 'like':
+                    $new_rating = $rating + 1;
+                    break;
+                case 'dislike':
+                    $new_rating = $rating - 1;
+                    break;
+                default:
+                    echo 'Something went wrong :(';
             }
-            $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+            $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
+            $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
         } else {
             echo 'You have already rated this post';
         }
@@ -163,17 +167,19 @@ function book_post_evaluation()
     }
 }
 
-add_action( 'wp_ajax_book_post_evaluation', 'book_post_evaluation' );
+add_action('wp_ajax_book_post_evaluation', 'book_post_evaluation');
 
-function script_enqueue() {
+function script_enqueue()
+{
 
-    wp_register_script( "book_likes", plugin_dir_url(__FILE__).'book_likes.js', array('jquery') );
-    wp_localize_script( 'book_likes', 'myAjax', ['ajaxurl' => admin_url( 'admin-ajax.php' )]);
+    wp_register_script("book_likes", plugin_dir_url(__FILE__) . 'book_likes.js', array('jquery'));
+    wp_localize_script('book_likes', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
 
-    wp_enqueue_script( 'jquery' );
-    wp_enqueue_script( 'book_likes' );
+    wp_enqueue_script('jquery');
+    wp_enqueue_script('book_likes');
 }
-add_action( 'init', 'script_enqueue' );
+
+add_action('init', 'script_enqueue');
 
 //Add meta box to books categories admin menu
 function select_main_book_box($book_category)
