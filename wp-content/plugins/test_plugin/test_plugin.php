@@ -125,6 +125,8 @@ add_action('init', 'create_book_categories', 0);
 //Add evaluation to book posts
 function book_post_evaluation()
 {
+    var_dump($_GET);
+
     global $wpdb;
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
@@ -143,6 +145,7 @@ function book_post_evaluation()
                 $new_rating = $rating - 1;
                 $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
             }
+            var_dump($_POST['evaluation']);
             $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
         } else {
             echo 'You have already liked this post';
