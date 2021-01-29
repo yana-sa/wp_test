@@ -126,6 +126,11 @@ add_action('init', 'create_book_categories', 0);
 function book_post_evaluation()
 {
     global $wpdb;
+
+    $result = [];
+    $status = 'error';
+    $message = '';
+
     if (is_user_logged_in()) {
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
@@ -147,9 +152,15 @@ function book_post_evaluation()
             if (!empty($new_rating)) {
                 $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
                 $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+
+                if ($rating_update !== false) {
+                    $rating = $rating_update;
+                    $status = 'error';
+                }
             }
         } else {
-            echo 'You have already rated this post';
+            $message = 'You have already rated this post';
+            $status = 'error';
         }
 
     } else {
@@ -157,19 +168,21 @@ function book_post_evaluation()
         $status = 'error';
     }
 
-    if ($rating_update === false) {
-        $status = 'error';
+    $result['status'] = $status;
+    $result['message'] = $message;
+
+    if (!empty($rating)) {
         $result['rating_for_books'] = $rating;
-        $result['message'] = $message;
-    } else {
-        $status = 'success';
-        $result['rating_for_books'] = $new_rating;
     }
 
-    $result['status'] = $status;
+    render_json_response($result);
+}
+
+function render_json_response($response)
+{
     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-        $result = json_encode($result);
-        echo $result;
+        echo json_encode($response);
+        die;
     } else {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
