@@ -174,7 +174,7 @@ add_action('wp_ajax_book_post_evaluation', 'book_post_evaluation');
 function script_enqueue()
 {
 
-    wp_register_script("book_likes", plugin_dir_url(__FILE__) . 'book_likes.js', array('jquery'));
+    wp_register_script('book_likes', plugin_dir_url(__FILE__) . 'book_likes.js', array('jquery'));
     wp_localize_script('book_likes', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
 
     wp_enqueue_script('jquery');
