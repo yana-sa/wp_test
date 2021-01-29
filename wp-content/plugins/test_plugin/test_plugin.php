@@ -52,8 +52,7 @@ function create_book_evaluation_table()
 		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 		  user_id BIGINT UNSIGNED NOT NULL,
 		  post_id BIGINT UNSIGNED NOT NULL,
-		  action VARCHAR (50),
-		  time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+		  action VARCHAR (50) NOT NULL,
 		  UNIQUE KEY id (id),
 		  
 		FOREIGN KEY (user_id) REFERENCES wp_users(ID)
@@ -131,7 +130,7 @@ function book_post_evaluation()
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
         $post_data = $_POST['evaluation'];
-        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
+        $sql = $wpdb->get_col( "SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);;
         $action = $sql['action'];
 
         $rating = get_post_meta($post_id, "_rating_for_books", true);
@@ -139,19 +138,15 @@ function book_post_evaluation()
         if (empty($action)) {
             if ($post_data == 'like') {
                 $new_rating = $rating + 1;
+                $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
             } elseif ($post_data == 'dislike') {
                 $new_rating = $rating - 1;
+                $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
             }
             $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
         } else {
-            if ($post_data == 'like') {
-                $new_rating = $rating + 2;
-            } elseif ($post_data == 'dislike') {
-                $new_rating = $rating - 2;
-            }
-            $wpdb->update('wp_book_evaluation', ['action' => $post_data], ['action' => $action], ['%s'], ['%s']);
+            echo 'You have already liked this post';
         }
-        $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
 
         if ($evaluation === false) {
             $result['type'] = "error";
@@ -164,6 +159,7 @@ function book_post_evaluation()
         if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
             $result = json_encode($result);
             echo $result;
+            var_dump($_REQUEST['evaluation']);
         } else {
             header("Location: " . $_SERVER["HTTP_REFERER"]);
         }
