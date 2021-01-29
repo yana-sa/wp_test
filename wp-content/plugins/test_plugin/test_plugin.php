@@ -129,24 +129,24 @@ function book_post_evaluation()
     if ( is_user_logged_in() ) {
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
-        $post_data = $_POST['evaluation'];
+        $evaluation = $_POST['evaluation'];
         $is_eval = $wpdb->get_col( "SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
 
         $rating = get_post_meta($post_id, "_rating_for_books", true);
         if (empty($is_eval)) {
-            if ($post_data == 'like') {
+            if ($evaluation == 'like') {
                 $new_rating = $rating + 1;
-                $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
-            } elseif ($post_data == 'dislike') {
+                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
+            } elseif ($evaluation == 'dislike') {
                 $new_rating = $rating - 1;
-                $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
+                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
             }
-            $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $post_data], ['%s']);
+            $wpdb->insert( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
         } else {
             echo 'You have already rated this post';
         }
 
-        if ($evaluation === false) {
+        if ($rating_update === false) {
             $result['type'] = "error";
             $result['rating_for_books'] = $rating;
         } else {
