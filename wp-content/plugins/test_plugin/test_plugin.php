@@ -144,8 +144,10 @@ function book_post_evaluation()
                 default:
                     echo 'Something went wrong :(';
             }
-            $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
-            $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+            if (!empty($new_rating)) {
+                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
+                $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+            }
         } else {
             echo 'You have already rated this post';
         }
