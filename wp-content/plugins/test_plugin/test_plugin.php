@@ -130,11 +130,10 @@ function book_post_evaluation()
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
         $post_data = $_POST['evaluation'];
-        $sql = $wpdb->get_row( "SELECT action FROM `wp_book_evaluation` WHERE user_id = $user_id AND post_id = '$post_id'", ARRAY_A);;
-        $action = $sql['action'];
+        $is_eval = $wpdb->get_col( "SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
 
         $rating = get_post_meta($post_id, "_rating_for_books", true);
-        if (empty($action)) {
+        if (empty($is_eval)) {
             if ($post_data == 'like') {
                 $new_rating = $rating + 1;
                 $evaluation = update_post_meta($post_id, "_rating_for_books", $new_rating);
