@@ -154,10 +154,11 @@ function book_post_evaluation()
                 $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
 
                 if ($rating_update !== false) {
-                    $rating = $rating_update;
-                    $status = 'error';
+                    $rating = $new_rating;
+                    $status = 'success';
                 }
             }
+
         } else {
             $message = 'You have already rated this post';
             $status = 'error';
@@ -175,17 +176,8 @@ function book_post_evaluation()
         $result['rating_for_books'] = $rating;
     }
 
-    render_json_response($result);
-}
-
-function render_json_response($response)
-{
-    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-        echo json_encode($response);
-        die;
-    } else {
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
-    }
+    wp_send_json($result);
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
 }
 
 add_action('wp_ajax_book_post_evaluation', 'book_post_evaluation');
