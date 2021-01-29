@@ -132,7 +132,7 @@ function book_post_evaluation()
         $evaluation = $_POST['evaluation'];
         $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
 
-        $rating = get_post_meta($post_id, "_rating_for_books", true);
+        $rating = get_post_meta($post_id, '_rating_for_books', true);
         if (empty($is_eval)) {
             switch ($evaluation) {
                 case 'like':
@@ -145,7 +145,7 @@ function book_post_evaluation()
                     echo 'Something went wrong :(';
             }
             if (!empty($new_rating)) {
-                $rating_update = update_post_meta($post_id, "_rating_for_books", $new_rating);
+                $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
                 $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
             }
         } else {
@@ -153,10 +153,10 @@ function book_post_evaluation()
         }
 
         if ($rating_update === false) {
-            $result['type'] = "error";
+            $result['type'] = 'error';
             $result['rating_for_books'] = $rating;
         } else {
-            $result['type'] = "success";
+            $result['type'] = 'success';
             $result['rating_for_books'] = $new_rating;
         }
 
@@ -164,7 +164,7 @@ function book_post_evaluation()
             $result = json_encode($result);
             echo $result;
         } else {
-            header("Location: " . $_SERVER["HTTP_REFERER"]);
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
         }
     }
 }
