@@ -123,20 +123,18 @@ function create_book_categories()
 add_action('init', 'create_book_categories', 0);
 
 //Add evaluation to book posts
-function book_post_evaluation()
+function book_evaluation_data()
 {
     global $wpdb;
-
-    $result = [];
     $status = 'error';
-    $message = '';
+    $message = ' ';
 
     if (is_user_logged_in()) {
         $user_id = get_current_user_id();
         $post_id = $_REQUEST['post_id'];
         $evaluation = $_POST['evaluation'];
-        $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
 
+        $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
         $rating = get_post_meta($post_id, '_rating_for_books', true);
         if (empty($is_eval)) {
             switch ($evaluation) {
@@ -158,29 +156,30 @@ function book_post_evaluation()
                     $status = 'success';
                 }
             }
-
         } else {
             $message = 'You have already rated this post';
             $status = 'error';
         }
-
     } else {
         $message = 'You are not logged in!';
         $status = 'error';
     }
+    book_evaluation_response($status, $message, $rating);
+}
 
-    $result['status'] = $status;
-    $result['message'] = $message;
-
+function book_evaluation_response($status, $message, $rating)
+{
     if (!empty($rating)) {
         $result['rating_for_books'] = $rating;
     }
+    $result['status'] = $status;
+    $result['message'] = $message;
 
     wp_send_json($result);
     header('Location: ' . $_SERVER['HTTP_REFERER']);
 }
 
-add_action('wp_ajax_book_post_evaluation', 'book_post_evaluation');
+add_action('wp_ajax_book_evaluation_data', 'book_evaluation_data');
 
 function script_enqueue()
 {
