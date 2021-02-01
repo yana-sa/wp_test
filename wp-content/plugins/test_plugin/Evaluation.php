@@ -3,6 +3,13 @@
 class Evaluation
 {
     private $wpdb;
+
+    public function __construct()
+    {
+        global $wpdb;
+        $this->wpdb = $wpdb;
+    }
+
     public function book_evaluation_data()
     {
         $user_id = get_current_user_id();
@@ -10,10 +17,10 @@ class Evaluation
         $evaluation = $_POST['evaluation'];
 
         $rating = get_post_meta($post_id, '_rating_for_books', true);
-        $error_message = self::validate_book_evaluation($user_id, $post_id, $evaluation);
+        $error_message = $this->validate_book_evaluation($user_id, $post_id, $evaluation);
 
         if (!empty($error_message)) {
-            self::book_evaluation_response('error', $error_message, $rating);
+            $this->book_evaluation_response('error', $error_message, $rating);
         }
 
         if ($evaluation == 'like') {
@@ -29,7 +36,7 @@ class Evaluation
             $rating = $new_rating;
         }
 
-        self::book_evaluation_response('success', '', $rating);
+        $this->book_evaluation_response('success', '', $rating);
     }
 
     private function validate_book_evaluation($user_id, $post_id, $evaluation)

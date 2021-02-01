@@ -3,16 +3,23 @@
 class ResetEvaluation
 {
     private $wpdb;
+
+    public function __construct()
+    {
+        global $wpdb;
+        $this->wpdb = $wpdb;
+    }
+
     public function reset_book_evaluation()
     {
         $user_id = get_current_user_id();
         $post_id = $_POST['post_id'];
 
-        $error_message = self::validate_reset_book_evaluation($user_id, $post_id);
+        $error_message = $this->validate_reset_book_evaluation($user_id, $post_id);
         $rating = get_post_meta($post_id, '_rating_for_books', true);
 
         if (!empty($error_message)) {
-            self::book_evaluation_response('error', $error_message, $rating);
+            $this->book_evaluation_response('error', $error_message, $rating);
         }
 
         $sql = $this->wpdb->get_row("SELECT 'action' FROM $this->wpdb->wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
@@ -30,7 +37,7 @@ class ResetEvaluation
             $rating = $new_rating;
         }
 
-        self::book_evaluation_response('success', '', $rating);
+        $this->book_evaluation_response('success', '', $rating);
     }
 
     private function validate_reset_book_evaluation($user_id, $post_id)
