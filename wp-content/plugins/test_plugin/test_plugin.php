@@ -129,40 +129,50 @@ function book_evaluation_data()
     $status = 'error';
     $message = ' ';
 
+    $user_id = get_current_user_id();
+    $post_id = $_REQUEST['post_id'];
+    $evaluation = $_POST['evaluation'];
+
+    $rating = get_post_meta($post_id, '_rating_for_books', true);
+    if (validate_book_evaluation($user_id, $post_id) == true) {
+        switch ($evaluation) {
+            case 'like':
+                $new_rating = $rating + 1;
+                break;
+            case 'dislike':
+                $new_rating = $rating - 1;
+                break;
+            default:
+                $message = 'Something went wrong!';
+        }
+        if (!empty($new_rating)) {
+            $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
+            $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+
+            if ($rating_update !== false) {
+                $rating = $new_rating;
+                $status = 'success';
+            }
+        }
+        book_evaluation_response($status, $message, $rating);
+    }
+}
+
+function validate_book_evaluation($user_id, $post_id)
+{
+    global $wpdb;
+
     if (is_user_logged_in()) {
-        $user_id = get_current_user_id();
-        $post_id = $_REQUEST['post_id'];
-        $evaluation = $_POST['evaluation'];
-
         $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-        $rating = get_post_meta($post_id, '_rating_for_books', true);
         if (empty($is_eval)) {
-            switch ($evaluation) {
-                case 'like':
-                    $new_rating = $rating + 1;
-                    break;
-                case 'dislike':
-                    $new_rating = $rating - 1;
-                    break;
-                default:
-                    $message = 'Something went wrong!';
-            }
-            if (!empty($new_rating)) {
-                $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-                $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
-
-                if ($rating_update !== false) {
-                    $rating = $new_rating;
-                    $status = 'success';
-                }
-            }
+            return true;
         } else {
             $message = 'You have already rated this post';
             $status = 'error';
         }
     } else {
-        $message = 'You are not logged in!';
-        $status = 'error';
+            $message = 'You are not logged in!';
+            $status = 'error';
     }
     book_evaluation_response($status, $message, $rating);
 }
