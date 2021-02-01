@@ -14,6 +14,7 @@ class ResetEvaluation
     {
         $user_id = get_current_user_id();
         $post_id = $_POST['post_id'];
+        $table_name = $this->wpdb->prefix . 'book_evaluation';
 
         $error_message = $this->validate_reset_book_evaluation($user_id, $post_id);
         $rating = get_post_meta($post_id, '_rating_for_books', true);
@@ -22,7 +23,7 @@ class ResetEvaluation
             $this->book_evaluation_response('error', $error_message, $rating);
         }
 
-        $sql = $this->wpdb->get_row("SELECT 'action' FROM $this->wpdb->wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
+        $sql = $this->wpdb->get_row("SELECT 'action' FROM $table_name WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
         $evaluation = $sql['action'];
         if ($evaluation == 'like') {
             $new_rating = $rating - 1;
@@ -31,7 +32,7 @@ class ResetEvaluation
         }
 
         $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-        $this->wpdb->delete('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id], ['%d', '%s']);
+        $this->wpdb->delete($table_name, ['user_id' => $user_id, 'post_id' => $post_id], ['%d', '%s']);
 
         if ($rating_update !== false) {
             $rating = $new_rating;
@@ -42,8 +43,10 @@ class ResetEvaluation
 
     private function validate_reset_book_evaluation($user_id, $post_id)
     {
+        $table_name = $this->wpdb->prefix . 'book_evaluation';
+
         if (!empty($user_id)) {
-            $is_eval = $this->wpdb->get_col("SELECT 1 FROM $this->wpdb->wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
+            $is_eval = $this->wpdb->get_col("SELECT 1 FROM $table_name WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
             if (empty($is_eval)) {
                 return 'You have not evaluated this book yet!';
             }
