@@ -7,6 +7,8 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
+require_once 'Evaluation.php';
+require_once 'ResetEvaluation.php';
 
 //Seeding books on plugin activation
 function insert_books()
@@ -123,116 +125,8 @@ function create_book_categories()
 add_action('init', 'create_book_categories', 0);
 
 //Add evaluation to book posts
-function book_evaluation_data()
-{
-    global $wpdb;
-
-    $user_id = get_current_user_id();
-    $post_id = $_POST['post_id'];
-    $evaluation = $_POST['evaluation'];
-
-    $rating = get_post_meta($post_id, '_rating_for_books', true);
-    $error_message = validate_book_evaluation($user_id, $post_id, $evaluation);
-
-    if (!empty($error_message)) {
-        book_evaluation_response('error', $error_message, $rating);
-    }
-
-    if ($evaluation == 'like') {
-        $new_rating = $rating + 1;
-    } else {
-        $new_rating = $rating - 1;
-    }
-
-    $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-    $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
-
-    if ($rating_update !== false) {
-        $rating = $new_rating;
-    }
-
-    book_evaluation_response('success', '', $rating);
-}
-
-function validate_book_evaluation($user_id, $post_id, $evaluation)
-{
-    global $wpdb;
-
-    if (!in_array($evaluation, ['like', 'dislike'])) {
-        return 'Evaluation type is not valid';
-    }
-
-    if (!empty($user_id)) {
-        $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-        if (!empty($is_eval)) {
-            return 'You have already rated this post';
-        }
-    } else {
-        return 'You are not logged in!';
-    }
-}
-
-function book_evaluation_response($status, $message, $rating)
-{
-    if (!empty($rating)) {
-        $result['rating_for_books'] = $rating;
-    }
-    $result['status'] = $status;
-    $result['message'] = $message;
-
-    wp_send_json($result);
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
-}
-
-add_action('wp_ajax_book_evaluation_data', 'book_evaluation_data');
-
-function validate_reset_book_evaluation($user_id, $post_id)
-{
-    global $wpdb;
-
-    if (!empty($user_id)) {
-        $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-        if (empty($is_eval)) {
-            return 'You have not evaluated this book yet!';
-        }
-    } else {
-        return 'You are not logged in!';
-    }
-}
-
-function reset_book_evaluation()
-{
-    global $wpdb;
-
-    $user_id = get_current_user_id();
-    $post_id = $_POST['post_id'];
-
-    $error_message = validate_reset_book_evaluation($user_id, $post_id);
-    $rating = get_post_meta($post_id, '_rating_for_books', true);
-
-    if (!empty($error_message)) {
-        book_evaluation_response('error', $error_message, $rating);
-    }
-
-    $sql = $wpdb->get_row("SELECT `action` FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-    $evaluation = $sql['action'];
-    if ($evaluation == 'like') {
-        $new_rating = $rating - 1;
-    } else {
-        $new_rating = $rating + 1;
-    }
-
-    $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-    $wpdb->delete('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id], ['%d', '%s']);
-
-    if ($rating_update !== false) {
-        $rating = $new_rating;
-    }
-
-    book_evaluation_response('success', '', $rating);
-}
-
-add_action('wp_ajax_reset_book_evaluation', 'reset_book_evaluation');
+add_action('wp_ajax_book_evaluation_data', ['Evaluation', 'book_evaluation_data']);
+add_action('wp_ajax_reset_book_evaluation', ['ResetEvaluation', 'reset_book_evaluation']);
 
 function script_enqueue()
 {
