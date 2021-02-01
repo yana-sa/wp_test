@@ -140,8 +140,7 @@ function book_evaluation_data()
 
     if ($evaluation == 'like') {
         $new_rating = $rating + 1;
-    }
-    else {
+    } else {
         $new_rating = $rating - 1;
     }
 
@@ -168,8 +167,7 @@ function validate_book_evaluation($user_id, $post_id, $evaluation)
         if (!empty($is_eval)) {
             return 'You have already rated this post';
         }
-    }
-    else {
+    } else {
         return 'You are not logged in!';
     }
 }
@@ -188,21 +186,16 @@ function book_evaluation_response($status, $message, $rating)
 
 add_action('wp_ajax_book_evaluation_data', 'book_evaluation_data');
 
-function validate_reset_book_evaluation($user_id, $post_id, $reset)
+function validate_reset_book_evaluation($user_id, $post_id)
 {
     global $wpdb;
-
-    if ($reset !== 'true') {
-        return'Request is not valid!';
-    }
 
     if (!empty($user_id)) {
         $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
         if (empty($is_eval)) {
             return 'You have not evaluated this book yet!';
         }
-    }
-    else {
+    } else {
         return 'You are not logged in!';
     }
 }
@@ -213,9 +206,8 @@ function reset_book_evaluation()
 
     $user_id = get_current_user_id();
     $post_id = $_POST['post_id'];
-    $reset = $_POST['reset'];
 
-    $error_message = validate_reset_book_evaluation($user_id, $post_id, $reset);
+    $error_message = validate_reset_book_evaluation($user_id, $post_id);
     $rating = get_post_meta($post_id, '_rating_for_books', true);
 
     if (!empty($error_message)) {
@@ -226,13 +218,12 @@ function reset_book_evaluation()
     $evaluation = $sql['action'];
     if ($evaluation == 'like') {
         $new_rating = $rating - 1;
-    }
-    else {
+    } else {
         $new_rating = $rating + 1;
     }
 
     $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-    $wpdb->delete( 'wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id], ['%d', '%s']);
+    $wpdb->delete('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id], ['%d', '%s']);
 
     if ($rating_update !== false) {
         $rating = $new_rating;
