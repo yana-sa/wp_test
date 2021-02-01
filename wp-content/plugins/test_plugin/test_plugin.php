@@ -126,55 +126,52 @@ add_action('init', 'create_book_categories', 0);
 function book_evaluation_data()
 {
     global $wpdb;
-    $status = 'error';
-    $message = ' ';
 
     $user_id = get_current_user_id();
-    $post_id = $_REQUEST['post_id'];
+    $post_id = $_POST['post_id'];
     $evaluation = $_POST['evaluation'];
 
     $rating = get_post_meta($post_id, '_rating_for_books', true);
-    if (validate_book_evaluation($user_id, $post_id) == true) {
-        switch ($evaluation) {
-            case 'like':
-                $new_rating = $rating + 1;
-                break;
-            case 'dislike':
-                $new_rating = $rating - 1;
-                break;
-            default:
-                $message = 'Something went wrong!';
-        }
-        if (!empty($new_rating)) {
-            $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
-            $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+    $error_message = validate_book_evaluation($user_id, $post_id, $evaluation);
 
-            if ($rating_update !== false) {
-                $rating = $new_rating;
-                $status = 'success';
-            }
-        }
-        book_evaluation_response($status, $message, $rating);
+    if (!empty($error_message)) {
+        book_evaluation_response('error', $error_message, $rating);
     }
+
+    if ($evaluation == 'like') {
+        $new_rating = $rating + 1;
+    }
+    else {
+        $new_rating = $rating - 1;
+    }
+
+    $rating_update = update_post_meta($post_id, '_rating_for_books', $new_rating);
+    $wpdb->insert('wp_book_evaluation', ['user_id' => $user_id, 'post_id' => $post_id, 'action' => $evaluation], ['%s']);
+
+    if ($rating_update !== false) {
+        $rating = $new_rating;
+    }
+
+    book_evaluation_response('success', '', $rating);
 }
 
-function validate_book_evaluation($user_id, $post_id)
+function validate_book_evaluation($user_id, $post_id, $evaluation)
 {
     global $wpdb;
 
+    if (!in_array($evaluation, ['like', 'dislike'])) {
+        return 'Evaluation type is not valid';
+    }
+
     if (is_user_logged_in()) {
         $is_eval = $wpdb->get_col("SELECT 1 FROM `wp_book_evaluation` WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-        if (empty($is_eval)) {
-            return true;
-        } else {
-            $message = 'You have already rated this post';
-            $status = 'error';
+        if (!empty($is_eval)) {
+            return 'You have already rated this post';
         }
-    } else {
-            $message = 'You are not logged in!';
-            $status = 'error';
     }
-    book_evaluation_response($status, $message, $rating);
+    else {
+        return 'You are not logged in!';
+    }
 }
 
 function book_evaluation_response($status, $message, $rating)
@@ -193,7 +190,7 @@ add_action('wp_ajax_book_evaluation_data', 'book_evaluation_data');
 
 function script_enqueue()
 {
-    wp_register_script('book_likes', plugin_dir_url(__FILE__) . 'book_likes.js', array('jquery'));
+    wp_register_script('book_likes', plugin_dir_url(__FILE__) . 'book_likes.js', ['jquery']);
     wp_localize_script('book_likes', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
 
     wp_enqueue_script('jquery');
