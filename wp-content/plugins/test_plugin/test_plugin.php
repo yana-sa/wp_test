@@ -9,7 +9,7 @@ Version: 1.0.0
 */
 require_once 'Evaluation.php';
 require_once 'ResetEvaluation.php';
-
+global $wpdb;
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -129,8 +129,8 @@ function create_book_categories()
 add_action('init', 'create_book_categories', 0);
 
 //Add evaluation to book posts
-add_action('wp_ajax_book_evaluation_data', [new Evaluation, 'book_evaluation_data']);
-add_action('wp_ajax_reset_book_evaluation', [new ResetEvaluation, 'reset_book_evaluation']);
+add_action('wp_ajax_book_evaluation_data', [new Evaluation($wpdb), 'book_evaluation_data']);
+add_action('wp_ajax_reset_book_evaluation', [new ResetEvaluation($wpdb), 'reset_book_evaluation']);
 
 function script_enqueue()
 {
