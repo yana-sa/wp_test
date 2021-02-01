@@ -10,6 +10,10 @@ Version: 1.0.0
 require_once 'Evaluation.php';
 require_once 'ResetEvaluation.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 //Seeding books on plugin activation
 function insert_books()
 {
