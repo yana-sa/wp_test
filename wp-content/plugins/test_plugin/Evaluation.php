@@ -1,9 +1,8 @@
 <?php
 
-
 class Evaluation
 {
-    public static function book_evaluation_data()
+    public function book_evaluation_data()
     {
         global $wpdb;
         $user_id = get_current_user_id();
@@ -33,10 +32,9 @@ class Evaluation
         self::book_evaluation_response('success', '', $rating);
     }
 
-    private static function validate_book_evaluation($user_id, $post_id, $evaluation)
+    private function validate_book_evaluation($user_id, $post_id, $evaluation)
     {
         global $wpdb;
-
         if (!in_array($evaluation, ['like', 'dislike'])) {
             return 'Evaluation type is not valid';
         }
@@ -51,7 +49,7 @@ class Evaluation
         }
     }
 
-    private static function book_evaluation_response($status, $message, $rating)
+    private function book_evaluation_response($status, $message, $rating)
     {
         if (!empty($rating)) {
             $result['rating_for_books'] = $rating;
@@ -60,6 +58,5 @@ class Evaluation
         $result['message'] = $message;
 
         wp_send_json($result);
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
 }

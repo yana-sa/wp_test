@@ -129,8 +129,8 @@ function create_book_categories()
 add_action('init', 'create_book_categories', 0);
 
 //Add evaluation to book posts
-add_action('wp_ajax_book_evaluation_data', ['Evaluation', 'book_evaluation_data']);
-add_action('wp_ajax_reset_book_evaluation', ['ResetEvaluation', 'reset_book_evaluation']);
+add_action('wp_ajax_book_evaluation_data', [new Evaluation, 'book_evaluation_data']);
+add_action('wp_ajax_reset_book_evaluation', [new ResetEvaluation, 'reset_book_evaluation']);
 
 function script_enqueue()
 {

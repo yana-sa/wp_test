@@ -2,9 +2,11 @@
 
 class ResetEvaluation
 {
-    public static function reset_book_evaluation()
+    public function reset_book_evaluation()
     {
         global $wpdb;
+        var_dump($wpdb);
+
         $user_id = get_current_user_id();
         $post_id = $_POST['post_id'];
 
@@ -33,7 +35,7 @@ class ResetEvaluation
         self::book_evaluation_response('success', '', $rating);
     }
 
-    private static function validate_reset_book_evaluation($user_id, $post_id)
+    private function validate_reset_book_evaluation($user_id, $post_id)
     {
         global $wpdb;
         if (!empty($user_id)) {
@@ -46,7 +48,7 @@ class ResetEvaluation
         }
     }
 
-    private static function book_evaluation_response($status, $message, $rating)
+    private function book_evaluation_response($status, $message, $rating)
     {
         if (!empty($rating)) {
             $result['rating_for_books'] = $rating;
@@ -55,6 +57,5 @@ class ResetEvaluation
         $result['message'] = $message;
 
         wp_send_json($result);
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
     }
 }
