@@ -1,0 +1,18 @@
+/*
+Theme Name: Twenty Twenty One Child
+Theme URL: http://localhost:8000
+Description: Twenty Twenty One Child
+Theme Author: Unknown Yana
+Author URL: http://localhost:8000
+Template: twentytwentyone
+Version: 1.0.0
+Text Domain: twentytwentyone-child
+*/
+
+.like {
+    font-size:100px;
+}
+
+.dislike {
+    font-size:50px;
+}
