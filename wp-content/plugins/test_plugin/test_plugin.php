@@ -132,6 +132,15 @@ add_action('init', 'create_book_categories', 0);
 add_action('wp_ajax_book_evaluation_data', [new Evaluation($wpdb), 'book_evaluation_data']);
 add_action('wp_ajax_reset_book_evaluation', [new ResetEvaluation($wpdb), 'reset_book_evaluation']);
 
+function get_book_evaluation_action()
+{
+    global $wpdb;
+    $post_id = get_the_ID();
+    $user_id = get_current_user_id();
+    $sql = $wpdb->get_row("SELECT action FROM wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
+    $evaluation = $sql['action'];
+    return $evaluation;
+}
 function script_enqueue()
 {
     wp_register_script('book_likes-js', get_stylesheet_directory_uri() . '/js/book_likes.js', ['jquery']);

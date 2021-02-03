@@ -7,10 +7,6 @@ get_header();
 
 global $post;
 $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
-global $wpdb;
-$user_id = get_current_user_id();
-$sql = $wpdb->get_row("SELECT action FROM wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post->ID'", ARRAY_A);
-$evaluation = $sql['action'];
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -22,8 +18,8 @@ $evaluation = $sql['action'];
 
         <div class="entry-content alignwide">
             <h4><p id='rating_for_books'>Rating: <?php echo $rating_for_books; ?></p></h4>
-            <p><input type='button' formmethod='post' value='&#10133' id='like' data-post-id='<?php echo $post->ID; ?>' data-action='like' <?php if ($evaluation == 'like') { echo "disabled"; } ?>>
-                <input type='button' formmethod='post' value='&#10134' id='dislike' data-post-id='<?php echo $post->ID; ?>' data-action='dislike' <?php if ($evaluation == 'dislike') { echo "disabled"; } ?>></p>
+            <p><input type='button' formmethod='post' value='&#10133' id='like' data-post-id='<?php echo $post->ID; ?>' data-action='like' <?php if (get_book_evaluation_action() == 'like') { echo "disabled"; } ?>>
+                <input type='button' formmethod='post' value='&#10134' id='dislike' data-post-id='<?php echo $post->ID; ?>' data-action='dislike' <?php if (get_book_evaluation_action() == 'dislike') { echo "disabled"; } ?>></p>
         </div>
 
         <div class="entry-content">
