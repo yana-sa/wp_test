@@ -1,5 +1,5 @@
 jQuery(document).ready( function() {
-    jQuery("#like, #dislike").click( function(e) {
+    jQuery('[data-button="evaluation"]').click( function(e) {
         e.preventDefault();
         post_id = jQuery(this).attr('data-post-id');
         evaluation = jQuery(this).attr('data-action');

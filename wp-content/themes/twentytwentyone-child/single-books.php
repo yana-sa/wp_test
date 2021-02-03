@@ -7,6 +7,7 @@ get_header();
 
 global $post;
 $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
+$action = get_book_evaluation_action();
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -18,8 +19,8 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
 
         <div class="entry-content alignwide">
             <h4><p id='rating_for_books'>Rating: <?php echo $rating_for_books; ?></p></h4>
-            <p><input type='button' formmethod='post' value='&#10133' id='like' data-post-id='<?php echo $post->ID; ?>' data-action='like' <?php if (get_book_evaluation_action() == 'like') { echo "disabled"; } ?>>
-                <input type='button' formmethod='post' value='&#10134' id='dislike' data-post-id='<?php echo $post->ID; ?>' data-action='dislike' <?php if (get_book_evaluation_action() == 'dislike') { echo "disabled"; } ?>></p>
+            <p><input type='button' formmethod='post' value='&#10133' id='like' data-button="evaluation" data-post-id='<?php echo $post->ID; ?>' data-action='like' <?php if ($action == 'like') { echo "disabled"; } ?>>
+                <input type='button' formmethod='post' value='&#10134' id='dislike' data-button="evaluation" data-post-id='<?php echo $post->ID; ?>' data-action='dislike' <?php if ($action == 'dislike') { echo "disabled"; } ?>></p>
         </div>
 
         <div class="entry-content">
