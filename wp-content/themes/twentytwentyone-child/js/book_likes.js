@@ -1,11 +1,8 @@
 jQuery(document).ready( function() {
     jQuery(".like, .dislike").click( function(e) {
         e.preventDefault();
-        let id = jQuery(this.id);
-        let split_id = id.split("_");
-
-        let value = split_id[0];
-        let post_id = split_id[1];
+        post_id = jQuery(this).data('data-post-id');
+        value = jQuery(this).data('id');
         jQuery.ajax({
             type : "post",
             dataType : "json",

@@ -18,8 +18,8 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
 
         <div class="entry-content alignwide"><?php
             echo "<p id='rating_for_books'><h4>Rating: $rating_for_books</p>
-            <input type='button' formmethod='post' class='like' value='&#10133' id='like_" . $post->ID . "'>
-            <input type='button' formmethod='post' class='dislike' value='&#10134' id='dislike_" . $post->ID . "'>"
+            <input type='button' formmethod='post' class='like' value='&#10133' id='like' data-post-id='" . $post->ID . "'>
+            <input type='button' formmethod='post' class='dislike' value='&#10134' id='dislike' data-post-id='" . $post->ID . "'>"
             ?>
         </div>
 
