@@ -12,10 +12,10 @@ jQuery(document).ready( function() {
                 if(response.status === "success") {
                     jQuery("#rating_for_books").html("Rating: "+ response.rating_for_books);
                     if (evaluation === 'like') {
-                        jQuery("#like").prop('disabled', true);
+                        jQuery("#like").attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                     }
                     if (evaluation === 'dislike') {
-                        jQuery("#dislike").prop('disabled', true);
+                        jQuery("#dislike").attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                     }
                 }
                 else {
@@ -24,4 +24,35 @@ jQuery(document).ready( function() {
             }
         });
     });
+});
+
+jQuery(document).ready( function() {
+    jQuery('[data-button="evaluation"]').click( function(e) {
+        e.preventDefault();
+        if (jQuery(this).attr("data-chosen", "true")) {
+            post_id = jQuery(this).attr('data-post-id');
+            evaluation = jQuery(this).attr('data-action');
+            jQuery.ajax({
+                type : "post",
+                dataType : "json",
+                url : myAjax.ajaxurl,
+                data : {action:"reset_book_evaluation", post_id:post_id, evaluation:evaluation},
+                success: function(response) {
+                    if(response.status === "success") {
+                        if (evaluation === 'like') {
+                            jQuery("#like").attr("style", "background-color:#efefef").attr("data-chosen", "false");
+                            jQuery("#rating_for_books").html("Rating: "+ response.rating_for_books);
+                        }
+                        if (evaluation === 'dislike') {
+                            jQuery("#dislike").attr("style", "background-color:#efefef").attr("data-chosen", "false");
+                            jQuery("#rating_for_books").html("Rating: "+ response.rating_for_books);
+                        }
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                }
+            });
+        }
+    })
 });
