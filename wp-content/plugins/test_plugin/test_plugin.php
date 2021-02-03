@@ -137,11 +137,8 @@ function get_book_evaluation_action()
     global $wpdb;
     $post_id = get_the_ID();
     $user_id = get_current_user_id();
-    $sql = $wpdb->get_row("SELECT action FROM wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-    if ($sql !== null) {
-        $evaluation = $sql['action'];
-        return $evaluation;
-    }
+    $sql = $wpdb->get_col("SELECT action FROM wp_book_evaluation WHERE user_id = '$user_id' AND post_id = '$post_id'");
+    return $sql[0];
 }
 function script_enqueue()
 {

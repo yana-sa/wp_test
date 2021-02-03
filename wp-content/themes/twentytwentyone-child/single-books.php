@@ -8,6 +8,7 @@ get_header();
 global $post;
 $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true));
 $action = get_book_evaluation_action();
+echo $action;
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
