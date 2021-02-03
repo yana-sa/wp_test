@@ -16,11 +16,10 @@ $rating_for_books = esc_attr(get_post_meta($post->ID, '_rating_for_books', true)
             <?php twenty_twenty_one_post_thumbnail(); ?>
         </header>
 
-        <div class="entry-content alignwide"><?php
-            echo "<p id='rating_for_books'><h4>Rating: $rating_for_books</p>
-            <input type='button' formmethod='post' class='like' value='&#10133' id='like' data-post-id='" . $post->ID . "'>
-            <input type='button' formmethod='post' class='dislike' value='&#10134' id='dislike' data-post-id='" . $post->ID . "'>"
-            ?>
+        <div class="entry-content alignwide">
+            <p id='rating_for_books'><h4>Rating: <?php echo $rating_for_books; ?></h4></p>
+            <input type='button' formmethod='post' class='like' value='&#10133' id='like' data-post-id='<?php echo $post->ID; ?>' data-action='like'>
+            <input type='button' formmethod='post' class='dislike' value='&#10134' id='dislike' data-post-id='<?php echo $post->ID; ?>' data-action='like'>
         </div>
 
         <div class="entry-content">

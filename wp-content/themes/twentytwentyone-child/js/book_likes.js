@@ -2,7 +2,7 @@ jQuery(document).ready( function() {
     jQuery(".like, .dislike").click( function(e) {
         e.preventDefault();
         post_id = jQuery(this).data('data-post-id');
-        value = jQuery(this).data('id');
+        value = jQuery(this).data('data-action');
         jQuery.ajax({
             type : "post",
             dataType : "json",
