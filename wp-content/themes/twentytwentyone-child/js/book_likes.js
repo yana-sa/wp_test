@@ -20,7 +20,7 @@ function sendEvaluationRequest(post_id, evaluation, $this) {
         data: {action: "book_evaluation_data", post_id: post_id, evaluation: evaluation},
         success: function (response) {
             if (response.status === "success") {
-                $this.closest('[data_parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
+                $this.closest('[data-div="rating_block"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
                     $this.attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                 }
@@ -42,7 +42,7 @@ function sendResetEvaluationRequest(post_id, evaluation, $this) {
         data: {action: "reset_book_evaluation", post_id: post_id},
         success: function (response) {
             if (response.status === "success") {
-                $this.closest('[data_parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
+                $this.closest('[data-div="rating_block"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
                     $this.attr("style", "background-color:#efefef").removeAttr("data-chosen");
                 }
