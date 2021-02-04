@@ -4,9 +4,9 @@ jQuery(document).ready(function () {
         post_id = jQuery(this).attr('data-post-id');
         evaluation = jQuery(this).attr('data-action');
         if (jQuery(this).attr('data-chosen') === undefined) {
-            sendEvaluationRequest();
+            sendEvaluationRequest(post_id, evaluation);
         } else {
-            sendResetEvaluationRequest();
+            sendResetEvaluationRequest(post_id, evaluation);
         }
     });
 });
