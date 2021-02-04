@@ -21,10 +21,10 @@ function sendEvaluationRequest(post_id, evaluation) {
             if (response.status === "success") {
                 jQuery(this).closest('[data-parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
-                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="like"]').attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
+                    jQuery(this).attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                 }
                 if (evaluation === 'dislike') {
-                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="dislike"]').attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
+                    jQuery(this).attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                 }
             } else {
                 alert(response.message);
@@ -43,10 +43,10 @@ function sendResetEvaluationRequest(post_id, evaluation) {
             if (response.status === "success") {
                 jQuery(this).closest('[data-parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
-                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="like"]').attr("style", "background-color:#efefef").removeAttr("data-chosen");
+                    jQuery(this).attr("style", "background-color:#efefef").removeAttr("data-chosen");
                 }
                 if (evaluation === 'dislike') {
-                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="dislike"]').attr("style", "background-color:#efefef").removeAttr("data-chosen");
+                    jQuery(this).attr("style", "background-color:#efefef").removeAttr("data-chosen");
                 }
             } else {
                 alert(response.message);
