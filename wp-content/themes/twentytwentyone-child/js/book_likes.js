@@ -11,7 +11,7 @@ jQuery(document).ready(function () {
     });
 });
 
-function sendEvaluationRequest() {
+function sendEvaluationRequest(post_id, evaluation) {
     jQuery.ajax({
         type: "post",
         dataType: "json",
@@ -33,7 +33,7 @@ function sendEvaluationRequest() {
     });
 }
 
-function sendResetEvaluationRequest() {
+function sendResetEvaluationRequest(post_id, evaluation) {
     jQuery.ajax({
         type: "post",
         dataType: "json",
