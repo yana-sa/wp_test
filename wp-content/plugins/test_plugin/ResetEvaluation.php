@@ -23,8 +23,7 @@ class ResetEvaluation
             $this->book_evaluation_response('error', $error_message, $rating);
         }
 
-        $sql = $this->wpdb->get_row("SELECT 'action' FROM $table_name WHERE user_id = '$user_id' AND post_id = '$post_id'", ARRAY_A);
-        $evaluation = $sql['action'];
+        $evaluation = $this->wpdb->get_var("SELECT action FROM $table_name WHERE user_id = '$user_id' AND post_id = '$post_id'");
         if ($evaluation == 'like') {
             $new_rating = $rating - 1;
         } else {
