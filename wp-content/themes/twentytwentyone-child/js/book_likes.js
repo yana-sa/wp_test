@@ -19,12 +19,12 @@ function sendEvaluationRequest(post_id, evaluation) {
         data: {action: "book_evaluation_data", post_id: post_id, evaluation: evaluation},
         success: function (response) {
             if (response.status === "success") {
-                jQuery("#rating_for_books").html("Rating: " + response.rating_for_books);
+                jQuery(this).closest('[data-parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
-                    jQuery("#like").attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
+                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="like"]').attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                 }
                 if (evaluation === 'dislike') {
-                    jQuery("#dislike").attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
+                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="dislike"]').attr("style", "background-color:#8c8c8c").attr("data-chosen", "true");
                 }
             } else {
                 alert(response.message);
@@ -41,12 +41,12 @@ function sendResetEvaluationRequest(post_id, evaluation) {
         data: {action: "reset_book_evaluation", post_id: post_id},
         success: function (response) {
             if (response.status === "success") {
-                jQuery("#rating_for_books").html("Rating: " + response.rating_for_books);
+                jQuery(this).closest('[data-parent="parent"]').find('[data-p="book-rating"]').html("Rating: " + response.rating_for_books);
                 if (evaluation === 'like') {
-                    jQuery("#like").attr("style", "background-color:#efefef").removeAttr("data-chosen");
+                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="like"]').attr("style", "background-color:#efefef").removeAttr("data-chosen");
                 }
                 if (evaluation === 'dislike') {
-                    jQuery("#dislike").attr("style", "background-color:#efefef").removeAttr("data-chosen");
+                    jQuery(this).closest('[data-parent="parent"]').find('[data-action="dislike"]').attr("style", "background-color:#efefef").removeAttr("data-chosen");
                 }
             } else {
                 alert(response.message);

@@ -218,11 +218,12 @@ function fetch_books_shortcode()
         while ($query->have_posts()) {
             $query->the_post();
             $rating = get_post_meta(get_the_ID(), '_rating_for_books', true);
-            echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br>
-                <p id="rating_for_books">Rating: ' . $rating . '</p>
+            echo '<div data_parent="parent"><li>
+                <a href="' . get_permalink() . '">' . get_the_title() . '</a><br>
+                <p id="rating_for_books" data-p="book-rating">Rating: ' . $rating . '</p>
                 <input type="button" formmethod="post" value="&#10133" id="like" data-button="evaluation" data-post-id="' . get_the_ID() . '" data-action="like"' . (get_book_evaluation_action() == 'like' ? "style='background-color:#8c8c8c' data-chosen='true'" : " ") . '>
                 <input type="button" formmethod="post" value="&#10134" id="dislike" data-button="evaluation" data-post-id="' . get_the_ID() . '" data-action="dislike"' . (get_book_evaluation_action() == 'dislike' ? "style='background-color:#8c8c8c' data-chosen='true'" : " ") . '>
-                </li>';
+                </li></div>';
         }
     } else {
         echo 'Not found';
