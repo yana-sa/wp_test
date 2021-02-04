@@ -1,9 +1,9 @@
 jQuery(document).ready( function() {
     jQuery('[data-button="evaluation"]').click( function(e) {
         e.preventDefault();
-        if (jQuery(this).attr('[data-chosen]') === undefined) {
             post_id = jQuery(this).attr('data-post-id');
             evaluation = jQuery(this).attr('data-action');
+        if (jQuery(this).attr('[data-chosen]') === undefined) {
             jQuery.ajax({
                 type: "post",
                 dataType: "json",
@@ -23,16 +23,7 @@ jQuery(document).ready( function() {
                     }
                 }
             });
-        }
-    });
-});
-
-jQuery(document).ready( function() {
-    jQuery('[data-button="evaluation"]').click( function(e) {
-        e.preventDefault();
-        if (jQuery(this).attr('[data-chosen]') !== undefined) {
-            post_id = jQuery(this).attr('data-post-id');
-            evaluation = jQuery(this).attr('data-action');
+        } else {
             jQuery.ajax({
                 type: "post",
                 dataType: "json",
