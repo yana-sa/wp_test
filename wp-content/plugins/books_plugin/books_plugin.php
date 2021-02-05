@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Test
-Plugin URI: http://localhost:8000/test
-Description: An empty plugin
+Plugin Name: Books
+Plugin URI: http://localhost:8000/
+Description: Books plugin
 Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
@@ -10,9 +10,6 @@ Version: 1.0.0
 require_once 'Evaluation.php';
 require_once 'ResetEvaluation.php';
 global $wpdb;
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 //Seeding books on plugin activation
 function insert_books()
@@ -37,16 +34,16 @@ function insert_books()
     update_post_meta($post_id, '_book_evaluation', null);
 }
 
-function test_plugin_activate()
+function books_plugin_activate()
 {
     $i = 1;
     while ($i++ <= 10) {
         insert_books();
     }
-    do_action('test_plugin_activate');
+    do_action('books_plugin_activate');
 }
 
-register_activation_hook(__FILE__, 'test_plugin_activate');
+register_activation_hook(__FILE__, 'books_plugin_activate');
 
 function create_book_evaluation_table()
 {
@@ -308,7 +305,7 @@ function display_top_for_books($title)
 add_filter('the_title', 'display_top_for_books');
 
 //Deleting books on plugin deactivation
-function test_plugin_deactivate()
+function books_plugin_deactivate()
 {
     $query = new WP_Query(array(
         'post_type' => 'books',
@@ -321,10 +318,10 @@ function test_plugin_deactivate()
         wp_delete_post($post_id, true);
     }
 
-    do_action('test_plugin_deactivate');
+    do_action('books_plugin_deactivate');
 }
 
-register_deactivation_hook(__FILE__, 'test_plugin_deactivate');
+register_deactivation_hook(__FILE__, 'books_plugin_deactivate');
 
 function drop_book_evaluation_table()
 {
