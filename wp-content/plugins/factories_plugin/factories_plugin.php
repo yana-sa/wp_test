@@ -96,6 +96,7 @@ function create_companies_post_type()
             'show_in_menu' => true,
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
+            'register_meta_box_cb' => 'company_selection',
         ]
     );
 }
@@ -116,10 +117,11 @@ function create_company_taxonomy()
             'add_new_item' => __('Add New Company'),
             'new_item_name' => __('New Company Name'),
             'menu_name' => __('Company`s Factories')],
-        'show_ui' => true,
+        'show_ui' => false,
         'show_in_rest' => true,
         'show_admin_column' => true,
         'update_count_callback' => '_update_post_term_count',
+        'show_in_quick_edit' => false,
         'query_var' => true,
         'rewrite' => ['slug' => 'company_factories']
     ]);
@@ -143,20 +145,40 @@ function create_company_taxonomy()
 
 add_action('init', 'create_company_taxonomy', 0);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-function select_one_company($object_id, $tt_id, $taxonomy)
+//Company selection box
+function companies_selection_add_meta_box()
 {
-    $terms = get_the_terms($object_id, $taxonomy);
-    foreach ($terms as $term) {
-        if ($taxonomy == 'company_factories' && !empty($term)) {
-            wp_delete_object_term_relationships($object_id, $taxonomy);
-        }
+    add_meta_box( 'company_factories',
+        'Company',
+        'companies_selection_meta_box',
+        'factories',
+        'side');
+}
+add_action('add_meta_boxes', 'companies_selection_add_meta_box');
+
+function companies_selection_meta_box()
+{
+    $taxonomy = 'company_factories';
+    $terms_arr = get_the_terms(get_the_ID(), $taxonomy);
+    if ($terms_arr !== false) {
+        $term_obj= $terms_arr[0];
+        $is_checked = $term_obj->term_id;
+    }
+
+    $terms = get_terms($taxonomy, ['hide_empty' => 0]);
+    echo '<div>';
+    foreach($terms as $term){
+        echo '<label id="company_factories" name="company_factories">
+            <input type="radio" id="company_factories" name="company_factories" value="' . $term->name . '" ' . ((isset($is_checked) && $is_checked == $term->term_id) ? "checked" : "") . '/>' . $term->name . '<br />
+            </label></br>';
+    }
+    echo '</div>';
+
+    if (isset($_POST['company_factories'])) {
+        wp_set_object_terms(get_the_ID(), $_POST['company_factories'], $taxonomy, false);
     }
 }
-add_action('add_term_relationship', 'select_one_company');
+add_action('edit_post_factories', 'companies_selection_meta_box', 10, 2);
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
@@ -170,6 +192,11 @@ function factories_plugin_deactivate()
         $query->the_post();
         $post_id = get_the_ID();
         wp_delete_post($post_id, true);
+    }
+
+    $terms = get_terms( 'company_factories', ['fields' => 'ids', 'hide_empty' => false]);
+    foreach ( $terms as $term ) {
+        wp_delete_term( $term, 'company_factories' );
     }
 
     do_action('factories_plugin_deactivate');
