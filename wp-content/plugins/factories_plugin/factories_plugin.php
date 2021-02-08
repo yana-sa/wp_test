@@ -143,19 +143,20 @@ function create_company_taxonomy()
 
 add_action('init', 'create_company_taxonomy', 0);
 
-function select_one_company()
-{
-    $term_id = get_queried_object_id();
-    $post_id = get_the_ID();
-    $taxonomy = 'company_factories';
-    $term_item = get_term($term_id, $taxonomy);
-    if (isset($term_item)) {
-        unset($term_item);
-    }
-    do_action( 'add_term_relationship', $post_id, $term_id, $taxonomy );
-};
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-add_action('added_term_relationship', 'select_one_company');
+function select_one_company($object_id, $tt_id, $taxonomy)
+{
+    $terms = get_the_terms($object_id, $taxonomy);
+    foreach ($terms as $term) {
+        if ($taxonomy == 'company_factories' && !empty($term)) {
+            wp_delete_object_term_relationships($object_id, $taxonomy);
+        }
+    }
+}
+add_action('add_term_relationship', 'select_one_company');
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
