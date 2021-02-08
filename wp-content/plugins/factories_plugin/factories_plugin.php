@@ -9,7 +9,7 @@ Version: 1.0.0
 */
 
 //Seeding data on plugin activation
-function insert_factories()
+function insert_factory()
 {
     $ftitle = 'The Factory ' . rand(1, 999);
     $randdesc = 'This is a test description ' . rand(1, 999) . '. Date: ' . date("d.m.Y");
@@ -24,7 +24,7 @@ function insert_factories()
     wp_insert_post($fdata, true);
 }
 
-function insert_companies()
+function insert_company()
 {
     $ctitle = 'The Company ' . rand(1, 999);
     $randdesc = 'This is a test description ' . rand(1, 999) . '. Date: ' . date("d.m.Y");
@@ -43,8 +43,8 @@ function factories_plugin_activate()
 {
     $i = 1;
     while ($i++ <= 10) {
-        insert_factories();
-        insert_companies();
+        insert_factory();
+        insert_company();
     }
     do_action('factories_plugin_activate');
 }
@@ -142,6 +142,20 @@ function create_company_taxonomy()
 }
 
 add_action('init', 'create_company_taxonomy', 0);
+
+function select_one_company()
+{
+    $term_id = get_queried_object_id();
+    $post_id = get_the_ID();
+    $taxonomy = 'company_factories';
+    $term_item = get_term($term_id, $taxonomy);
+    if (isset($term_item)) {
+        unset($term_item);
+    }
+    do_action( 'add_term_relationship', $post_id, $term_id, $taxonomy );
+};
+
+add_action('added_term_relationship', 'select_one_company');
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
