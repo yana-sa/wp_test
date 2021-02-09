@@ -115,25 +115,22 @@ function create_post_types_and_taxonomy ()
     );
 }
 
-add_action('init', 'create_post_types_and_taxonomy');
-
 function insert_taxonomies($post_id, $post, $update)
 {
+    create_post_types_and_taxonomy();
     if ($update == true){
         return;
     }
     if ($post->post_type == 'companies' && $post->post_status == 'publish') {
-        wp_insert_term(
+        wp_set_object_terms( $post_id,
             $post->post_title,
             'company_factories',
-                ['description' => $post->content,
-                'slug' => $post->post_name,]
+            false
         );
-        die(get_taxonomy('company_factories'));
     }
 }
 
-add_action('save_post_companies', 'insert_taxonomies', 10, 3);
+add_action('init', 'insert_taxonomies');
 
 //Company selection box
 function companies_selection_add_meta_box()
