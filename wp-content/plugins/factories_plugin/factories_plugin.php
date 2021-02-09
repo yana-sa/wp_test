@@ -51,7 +51,7 @@ function factories_plugin_activate()
 
 register_activation_hook(__FILE__, 'factories_plugin_activate');
 
-function create_post_types()
+function create_post_types_and_taxonomy()
 {
     register_post_type('factories', [
             'labels' => [
@@ -96,7 +96,7 @@ function create_post_types()
     create_taxonomy();
 }
 
-add_action('init', 'create_post_types');
+add_action('init', 'create_post_types_and_taxonomy');
 
 function create_taxonomy()
 {
@@ -112,11 +112,11 @@ function create_taxonomy()
             'add_new_item' => __('Add New Company'),
             'new_item_name' => __('New Company Name'),
             'menu_name' => __('Company`s Factories')],
-        'show_ui' => true,
+        'show_ui' => false,
         'show_in_rest' => true,
         'show_admin_column' => true,
         'update_count_callback' => '_update_post_term_count',
-        'show_in_quick_edit' => true,
+        'show_in_quick_edit' => false,
         'query_var' => true,
         'rewrite' => ['slug' => 'company_factories']
     ]);
@@ -124,16 +124,14 @@ function create_taxonomy()
 
 function insert_taxonomies($post_id, $post, $update)
 {
-    create_taxonomy();
     if ($update == true){
         return;
     }
     if ($post->post_type == 'companies' && $post->post_status == 'publish') {
-        wp_insert_term(
+        wp_set_object_terms( $post_id,
             $post->post_title,
             'company_factories',
-            ['description' => $post->content,
-                'slug' => $post->post_name,]
+            false
         );
     }
 }
@@ -147,7 +145,8 @@ function companies_selection_add_meta_box()
         'Company',
         'companies_selection_meta_box',
         'factories',
-        'side');
+        'side',
+        'high');
 }
 add_action('add_meta_boxes', 'companies_selection_add_meta_box');
 
