@@ -154,6 +154,9 @@ add_action('add_meta_boxes', 'companies_selection_add_meta_box');
 
 function companies_selection_meta_box()
 {
+    if (get_post_type() !== 'factories') {
+        return;
+    }
     $taxonomy = 'company_factories';
     $terms_arr = get_the_terms(get_the_ID(), $taxonomy);
     if ($terms_arr !== false) {
