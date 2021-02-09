@@ -124,14 +124,16 @@ function create_taxonomy()
 
 function insert_taxonomies($post_id, $post, $update)
 {
+    create_taxonomy();
     if ($update == true){
         return;
     }
     if ($post->post_type == 'companies' && $post->post_status == 'publish') {
-        wp_set_object_terms( $post_id,
+        wp_insert_term(
             $post->post_title,
             'company_factories',
-            false
+            ['description' => $post->content,
+                'slug' => $post->post_name,]
         );
     }
 }
