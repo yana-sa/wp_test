@@ -51,6 +51,25 @@ function factories_plugin_activate()
 
 register_activation_hook(__FILE__, 'factories_plugin_activate');
 
+function insert_taxonomies($post_id, $post, $update)
+{
+    if ($update == true){
+        return;
+    }
+    if ($post->post_type == 'companies' && $post->post_status == 'publish') {
+        wp_insert_term(
+            $post->post_title,
+            'company_factories',
+            [
+                'description' => $post->content,
+                'slug' => get_post_field('post_name', $post_id)
+            ]
+        );
+    }
+}
+
+add_action('wp_insert_post', 'insert_taxonomies', 10, 3);
+
 function create_factories_post_type()
 {
     register_post_type('factories', [
@@ -99,22 +118,6 @@ function create_companies_post_type()
             'register_meta_box_cb' => 'company_selection',
         ]
     );
-
-    $query = new WP_Query([
-        'post_type' => 'companies',
-    ]);
-
-    while ($query->have_posts()) {
-        $query->the_post();
-        wp_insert_term(
-            get_the_title(),
-            'company_factories',
-            [
-                'description' => get_the_content(),
-                'slug' => get_post_field('post_name', get_the_ID())
-            ]
-        );
-    }
 }
 
 add_action('init', 'create_companies_post_type');
