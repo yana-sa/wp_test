@@ -99,6 +99,22 @@ function create_companies_post_type()
             'register_meta_box_cb' => 'company_selection',
         ]
     );
+
+    $query = new WP_Query([
+        'post_type' => 'companies',
+    ]);
+
+    while ($query->have_posts()) {
+        $query->the_post();
+        wp_insert_term(
+            get_the_title(),
+            'company_factories',
+            [
+                'description' => get_the_content(),
+                'slug' => get_post_field('post_name', get_the_ID())
+            ]
+        );
+    }
 }
 
 add_action('init', 'create_companies_post_type');
@@ -125,22 +141,6 @@ function create_company_taxonomy()
         'query_var' => true,
         'rewrite' => ['slug' => 'company_factories']
     ]);
-
-    $query = new WP_Query([
-        'post_type' => 'companies',
-    ]);
-
-    while ($query->have_posts()) {
-        $query->the_post();
-        wp_insert_term(
-            get_the_title(),
-            'company_factories',
-            [
-                'description' => get_the_content(),
-                'slug' => get_post_field('post_name', get_the_ID())
-            ]
-        );
-    }
 }
 
 add_action('init', 'create_company_taxonomy', 0);
