@@ -13,6 +13,7 @@ function insert_factory()
 {
     $ftitle = 'The Factory ' . rand(1, 999);
     $randdesc = 'This is a test description ' . rand(1, 999) . '. Date: ' . date("d.m.Y");
+    $randprofit = rand(10000, 1000000);
 
     $fdata = [
         'post_type' => 'factories',
@@ -21,7 +22,9 @@ function insert_factory()
         'post_content' => $randdesc,
         'post_status' => 'publish',
     ];
-    wp_insert_post($fdata, true);
+    $post_id = wp_insert_post($fdata, true);
+
+    update_post_meta($post_id, '_monthly_profit', $randprofit);
 }
 
 function insert_company()
@@ -70,7 +73,8 @@ function create_post_types_and_taxonomy()
             'show_in_menu' => true,
             'taxonomies' => ['companies'],
             'supports' => ['title', 'editor', 'custom-fields'],
-            'menu_position' => 5,]
+            'menu_position' => 5,
+            'register_meta_box_cb' => 'monthly_profit_box']
     );
 
     register_post_type('companies', [
@@ -179,6 +183,37 @@ function companies_selection_meta_box()
 }
 
 add_action('edit_post_factories', 'companies_selection_meta_box', 10, 2);
+
+//Create monthly_profit meta box
+function monthly_profit_box()
+{
+    add_meta_box(
+        'monthly_profit',
+        __('Monthly Profit', 'sitepoint'),
+        'monthly_profit_content',
+        'factories',
+        'side'
+    );
+}
+
+add_action('add_meta_boxes_factories', 'monthly_profit_box');
+
+function monthly_profit_content($post)
+{
+    $value = get_post_meta($post->ID, '_monthly_profit', true);
+    echo '<textarea style="width:100%" id="monthly_profit" name="monthly_profit">' . $value . '</textarea>';
+}
+
+function monthly_profit_box_save($post_id)
+{
+    $profit = !empty($_POST['monthly_profit']) ? $_POST['monthly_profit'] : null;
+    if (!isset($profit)) {
+        $profit = 0;
+    }
+    update_post_meta($post_id, '_rating_for_books', $profit);
+}
+
+add_action('save_post', 'monthly_profit_box_save');
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
