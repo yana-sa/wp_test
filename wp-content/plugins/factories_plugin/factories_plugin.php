@@ -215,6 +215,7 @@ function monthly_profit_box_save($post_id)
 
 add_action('save_post', 'monthly_profit_box_save');
 
+//Get data for companies-report.php page
 function monthly_profit_report_data()
 {
     $report_data = [];
@@ -251,6 +252,32 @@ function monthly_profit_report_data()
         }
     }
     return $report_data;
+}
+
+//Get data for company post
+function company_post_data($post)
+{
+    $term = get_term_by('name', $post->post_title, 'company_factories');
+    wp_reset_query();
+    $args = ['post_type' => 'factories',
+        'company_factories' => $term->slug,
+    ];
+    $query = new WP_Query($args);
+    if ($query->have_posts() == true) {
+        $profit = [];
+        foreach ($query->posts as $factories) {
+            $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
+        }
+        echo '<h4>Monthly profit: ' . array_sum($profit) . '$</h4>
+                  <h5>Company owns:</h5>';
+        while ($query->have_posts()) {
+            $query->the_post();
+            echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br></li>';
+        }
+    } else {
+        echo '<h4>Monthly profit is unknown.</h4>
+              <h5>Company owns no factories.</h5>';
+    }
 }
 
 //Deleting data on plugin deactivation
