@@ -4,6 +4,7 @@
  *
  */
 get_header();
+$report_data = monthly_profit_report_data();
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -14,32 +15,19 @@ get_header();
         </header>
 
         <div class="entry-content alignwide">
-            <?php $terms = get_terms([
-                    'taxonomy' => 'company_factories',
-                    'hide_empty' => false,]);
-            foreach ( $terms as $term) {
-            wp_reset_query();
-                    $args = ['post_type' => 'factories',
-                    'company_factories' => $term->slug,];
-                $query = new WP_Query($args);
-                if($query->have_posts()) {
-                    $profit = [];
-                    foreach ($query->posts as $factories) {
-                        $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
-                    }?>
+            <?php
+            foreach ($report_data as $company) {?>
             <details>
-                <summary><b><?php echo $term->name; ?></b><br>
-                    Total monthly profit: <?php echo array_sum($profit)?>$</summary><?php
-                    while($query->have_posts()) {
-                        $query->the_post();
-                        $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true)); ?>
+                <summary><b><?php echo $company['title']; ?></b><br>
+                    Total monthly profit: <?php echo $company['sum_profit']?>$</summary><?php
+                foreach ($company['factories'] as $factory) {?>
                         <ul>
-                            <li><a href="<?php get_permalink() ?>"><?php echo get_the_title() ?></a><br>
-                                Monthly profit: <?php echo $monthly_profit; ?>$
+                            <li><a href="<?php $factory['link'] ?>"><?php echo $factory['title'] ?></a><br>
+                                Monthly profit: <?php echo $factory['monthly_profit'] ?>$
                             </li>
                         </ul><?php
-                    }?></details><?php
-                }
+                }?>
+            </details><?php
             }?>
         </div>
 

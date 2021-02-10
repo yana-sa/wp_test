@@ -215,6 +215,44 @@ function monthly_profit_box_save($post_id)
 
 add_action('save_post', 'monthly_profit_box_save');
 
+function monthly_profit_report_data()
+{
+    $report_data = [];
+    $terms = get_terms([
+    'taxonomy' => 'company_factories',
+    'hide_empty' => false,]);
+
+    foreach ( $terms as $term) {
+        wp_reset_query();
+        $args = ['post_type' => 'factories',
+                'company_factories' => $term->slug,
+        ];
+        $query = new WP_Query($args);
+        if ($query->have_posts()) {
+            $profit = [];
+            foreach ($query->posts as $factories) {
+                $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
+            }
+            $factories_data = [];
+            while ($query->have_posts()) {
+                $query->the_post();
+                $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
+                $factories_data[] = [
+                    'title' => get_the_title(),
+                    'link' => get_permalink(),
+                    'monthly_profit' => $monthly_profit,
+                ];
+            }
+            $report_data[] = [
+                'title' => $term->name,
+                'sum_profit' => array_sum($profit),
+                'factories' => $factories_data
+            ];
+        }
+    }
+    return $report_data;
+}
+
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
 {
