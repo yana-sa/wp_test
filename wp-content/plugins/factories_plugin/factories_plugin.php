@@ -219,13 +219,13 @@ function monthly_profit_report_data()
 {
     $report_data = [];
     $terms = get_terms([
-    'taxonomy' => 'company_factories',
-    'hide_empty' => false,]);
+        'taxonomy' => 'company_factories',
+        'hide_empty' => false,]);
 
-    foreach ( $terms as $term) {
+    foreach ($terms as $term) {
         wp_reset_query();
         $args = ['post_type' => 'factories',
-                'company_factories' => $term->slug,
+            'company_factories' => $term->slug,
         ];
         $query = new WP_Query($args);
         if ($query->have_posts()) {
