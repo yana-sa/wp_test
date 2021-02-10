@@ -125,7 +125,7 @@ function create_taxonomy()
 function insert_taxonomies($post_id, $post, $update)
 {
     create_taxonomy();
-    if ($update == true){
+    if ($update == true) {
         return;
     }
     if ($post->post_type == 'companies' && $post->post_status == 'publish') {
@@ -143,13 +143,13 @@ add_action('wp_insert_post', 'insert_taxonomies', 10, 3);
 //Company selection box
 function companies_selection_add_meta_box()
 {
-    add_meta_box( 'company_factories',
+    add_meta_box('company_factories',
         'Company',
         'companies_selection_meta_box',
         'factories',
-        'side',
-        'high');
+        'side');
 }
+
 add_action('add_meta_boxes', 'companies_selection_add_meta_box');
 
 function companies_selection_meta_box()
@@ -160,13 +160,13 @@ function companies_selection_meta_box()
     $taxonomy = 'company_factories';
     $terms_arr = get_the_terms(get_the_ID(), $taxonomy);
     if ($terms_arr !== false) {
-        $term_obj= $terms_arr[0];
+        $term_obj = $terms_arr[0];
         $is_checked = $term_obj->term_id;
     }
 
     $terms = get_terms($taxonomy, ['hide_empty' => 0]);
     echo '<div>';
-    foreach($terms as $term){
+    foreach ($terms as $term) {
         echo '<label id="company_factories" name="company_factories">
             <input type="radio" id="company_factories" name="company_factories" value="' . $term->name . '" ' . ((isset($is_checked) && $is_checked == $term->term_id) ? "checked" : "") . '/>' . $term->name . '<br />
             </label></br>';
@@ -177,6 +177,7 @@ function companies_selection_meta_box()
         wp_set_object_terms(get_the_ID(), $_POST['company_factories'], $taxonomy, false);
     }
 }
+
 add_action('edit_post_factories', 'companies_selection_meta_box', 10, 2);
 
 //Deleting data on plugin deactivation
@@ -193,9 +194,9 @@ function factories_plugin_deactivate()
         wp_delete_post($post_id, true);
     }
 
-    $terms = get_terms( 'company_factories', ['fields' => 'ids', 'hide_empty' => false]);
-    foreach ( $terms as $term ) {
-        wp_delete_term( $term, 'company_factories' );
+    $terms = get_terms('company_factories', ['fields' => 'ids', 'hide_empty' => false]);
+    foreach ($terms as $term) {
+        wp_delete_term($term, 'company_factories');
     }
 
     do_action('factories_plugin_deactivate');
