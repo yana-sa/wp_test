@@ -201,7 +201,7 @@ add_action('add_meta_boxes_factories', 'monthly_profit_box');
 function monthly_profit_content($post)
 {
     $value = get_post_meta($post->ID, '_monthly_profit', true);
-    echo '<textarea style="width:100%" id="monthly_profit" name="monthly_profit">' . $value . '</textarea>';
+    echo '<input type="number" style="width:100%" id="monthly_profit" name="monthly_profit" value="' . $value . '">';
 }
 
 function monthly_profit_box_save($post_id)
@@ -210,7 +210,7 @@ function monthly_profit_box_save($post_id)
     if (!isset($profit)) {
         $profit = 0;
     }
-    update_post_meta($post_id, '_rating_for_books', $profit);
+    update_post_meta($post_id, '_monthly_profit', $profit);
 }
 
 add_action('save_post', 'monthly_profit_box_save');
