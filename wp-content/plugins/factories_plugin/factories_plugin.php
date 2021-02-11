@@ -62,14 +62,15 @@ function create_money_transfer_table()
 
     $sql = "CREATE TABLE $table_name (
 		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-		  transferor BIGINT UNSIGNED NOT NULL,
-		  transferee BIGINT UNSIGNED NOT NULL,
+		  transferor_id BIGINT UNSIGNED NOT NULL,
+		  transferee_id BIGINT UNSIGNED NOT NULL,
 		  sum INT UNSIGNED NOT NULL,
-		  UNIQUE KEY id (id),
+          date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          UNIQUE KEY id (id),
 		  
-		FOREIGN KEY (transferee) REFERENCES wp_posts(ID)
+		FOREIGN KEY (transferor_id) REFERENCES wp_posts(ID)
         ON DELETE CASCADE,
-		FOREIGN KEY (transferor) REFERENCES wp_posts(ID)
+		FOREIGN KEY (transferee_id) REFERENCES wp_posts(ID)
 		ON DELETE CASCADE
 		) $charset_collate;
 		";
