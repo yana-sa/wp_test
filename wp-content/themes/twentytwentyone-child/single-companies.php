@@ -10,15 +10,22 @@ get_header();
 
         <header class="entry-header alignwide">
             <?php the_title( '<h1 class="entry-title">', '</h1>' );
-                $company_data = company_post_data();
-                echo $company_data['profit']; ?>
+                $company_data = company_post_data();?>
+            <h4>Monthly profit is <?php echo (($company_data['profit'] !== null) ? $company_data['profit'] . '$' : 'unknown.' ) ?></h4>
             <?php twenty_twenty_one_post_thumbnail(); ?>
         </header>
 
         <div class="entry-content">
             <?php the_content();
-
-            echo $company_data['factories'];
+            $factories = $company_data['factories'];
+            if ($factories !== null) { ?>
+                <h5>Company owns:</h5>
+                <?php foreach ($factories as $factory) {?>
+                <li><a href="<?php $factory['link'] ?>"><?php echo $factory['title'] ?></a><br></li><?php
+                }
+            } else {?>
+                <h5>Company owns no factories.</h5><?php
+            }
 
             wp_link_pages(
                 array(

@@ -216,13 +216,18 @@ function monthly_profit_box_save($post_id)
 add_action('save_post', 'monthly_profit_box_save');
 
 //Get data for companies report page
-function factories_data($factories_obj)
+function factories_data($term)
 {
-    if ($factories_obj->have_posts()) {
+    wp_reset_query();
+    $args = ['post_type' => 'factories',
+        'company_factories' => $term->slug,
+    ];
+    $query = new WP_Query($args);
+    if ($query->have_posts()) {
         $profit = [];
         $factories_data = [];
-        while ($factories_obj->have_posts()) {
-            $factories_obj->the_post();
+        while ($query->have_posts()) {
+            $query->the_post();
             $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
             $factories_data[] = [
                 'title' => get_the_title(),
@@ -245,12 +250,7 @@ function monthly_profit_report_data()
         'hide_empty' => false,]);
 
     foreach ($terms as $term) {
-        wp_reset_query();
-        $args = ['post_type' => 'factories',
-            'company_factories' => $term->slug,
-        ];
-        $factories_obj = new WP_Query($args);
-        $factories_data = (factories_data($factories_obj));
+        $factories_data = (factories_data($term));
         if ($factories_data !== null) {
             $report_data[] = [
                 'title' => $term->name,
@@ -266,23 +266,17 @@ function monthly_profit_report_data()
 function company_post_data()
 {
     $term = get_term_by('name', get_the_title(), 'company_factories');
-    wp_reset_query();
-    $args = ['post_type' => 'factories',
-        'company_factories' => $term->slug,
-    ];
-    $factories_obj = new WP_Query($args);
-    $factories_data = (factories_data($factories_obj));
+    $factories_data = (factories_data($term));
+
     if ($factories_data !== null) {
-        $monthly_profit = '<h4>Monthly profit: ' . array_sum($factories_data['profit']) . '$</h4>';
-        $factories = '<h5>Company owns:</h5>';
-        foreach ($factories_data['factories_data'] as $factory_data) {
-            $factories .= '<li><a href="' . $factory_data['link'] . '">' . $factory_data['title'] . '</a><br></li>';
-        }
+        $monthly_profit = array_sum($factories_data['profit']);
+        $factories = $factories_data['factories_data'];
     } else {
-        $monthly_profit = '<h4>Monthly profit is unknown.</h4>';
-        $factories = '<h5>Company owns no factories.</h5>';
+        $monthly_profit = null;
+        $factories = null;
     }
-    return $res = ['profit' => $monthly_profit,
+    return $res = [
+        'profit' => $monthly_profit,
         'factories' => $factories,
     ];
 }
