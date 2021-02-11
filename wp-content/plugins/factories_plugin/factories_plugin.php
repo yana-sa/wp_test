@@ -236,7 +236,7 @@ function monthly_profit_content($post)
 
 function monthly_profit_box_save($post_id)
 {
-    $profit = !empty($_POST['monthly_profit']) ? $_POST['monthly_profit'] : null;
+    $profit = $_POST['monthly_profit'];
     if (!isset($profit)) {
         $profit = 0;
     }
@@ -267,7 +267,7 @@ function balance_box_content($post)
 
 function balance_box_save($post_id)
 {
-    $balance = !empty($_POST['balance']) ? $_POST['balance'] : null;
+    $balance = $_POST['balance'];
     if (!isset($balance)) {
         $balance = 0;
     }
@@ -301,16 +301,15 @@ function company_money_transfer_data()
     }
 
     if (!empty($_POST['transfer_data'])) {
-        $post_id = $current_company['id'];
-        handle_company_money_transfer($post_id);
+        $transferor_id = $current_company['id'];
+        handle_company_money_transfer($transferor_id);
     }
 
     return ['current' => $current_company,
             'companies' => $companies_arr];
 }
-function handle_company_money_transfer($post_id)
+function handle_company_money_transfer($transferor_id)
 {
-    $transferor_id = $post_id;
     $transferee_id = !empty($_POST['companies']) ? $_POST['companies'] : null;
     $sum = !empty($_POST['sum']) ? $_POST['sum'] : null;
 
