@@ -288,15 +288,13 @@ function company_money_transfer_data()
     wp_reset_query();
     $query = new WP_Query(['post_type' => 'companies']);
     $companies_arr = [];
-    if ($query->have_posts()) {
-        while ($query->have_posts()) {
-            $query->the_post();
-            $company = [
-                'id' => get_the_ID(),
-                'title' => get_the_title(),];
-            if ($company['id'] !== $current_company['id']){
-                $companies_arr[] = $company;
-            }
+    while ($query->have_posts()) {
+        $query->the_post();
+        $company = [
+            'id' => get_the_ID(),
+            'title' => get_the_title(),];
+        if ($company['id'] !== $current_company['id']) {
+            $companies_arr[] = $company;
         }
     }
 
@@ -306,8 +304,9 @@ function company_money_transfer_data()
     }
 
     return ['current' => $current_company,
-            'companies' => $companies_arr];
+        'companies' => $companies_arr];
 }
+
 function handle_company_money_transfer($transferor_id)
 {
     $transferee_id = !empty($_POST['companies']) ? $_POST['companies'] : null;
@@ -330,22 +329,20 @@ function factories_data($term)
         'company_factories' => $term->slug,
     ];
     $query = new WP_Query($args);
-    if ($query->have_posts()) {
-        $total_profit = 0;
-        $factories_data = [];
-        while ($query->have_posts()) {
-            $query->the_post();
-            $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
-            $factories_data[] = [
-                'title' => get_the_title(),
-                'link' => get_permalink(),
-                'monthly_profit' => $monthly_profit,
-            ];
-            $total_profit += $monthly_profit;
-        }
-        return ['profit' => $total_profit,
-            'data' => $factories_data];
+    $total_profit = 0;
+    $factories_data = [];
+    while ($query->have_posts()) {
+        $query->the_post();
+        $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
+        $factories_data[] = [
+            'title' => get_the_title(),
+            'link' => get_permalink(),
+            'monthly_profit' => $monthly_profit,
+        ];
+        $total_profit += $monthly_profit;
     }
+    return ['profit' => $total_profit,
+        'data' => $factories_data];
 }
 
 function monthly_profit_report_data()
