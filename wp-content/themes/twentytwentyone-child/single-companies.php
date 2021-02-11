@@ -4,21 +4,21 @@
  *
  */
 get_header();
-global $post;
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
         <header class="entry-header alignwide">
-            <?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+            <?php the_title( '<h1 class="entry-title">', '</h1>' );
+                $company_data = company_post_data();
+                echo $company_data['profit']; ?>
             <?php twenty_twenty_one_post_thumbnail(); ?>
         </header>
 
         <div class="entry-content">
-            <?php
-            the_content();
+            <?php the_content();
 
-            company_post_data($post);
+            echo $company_data['factories'];
 
             wp_link_pages(
                 array(

@@ -255,9 +255,9 @@ function monthly_profit_report_data()
 }
 
 //Get data for company post
-function company_post_data($post)
+function company_post_data()
 {
-    $term = get_term_by('name', $post->post_title, 'company_factories');
+    $term = get_term_by('name', get_the_title(), 'company_factories');
     wp_reset_query();
     $args = ['post_type' => 'factories',
         'company_factories' => $term->slug,
@@ -265,19 +265,21 @@ function company_post_data($post)
     $query = new WP_Query($args);
     if ($query->have_posts() == true) {
         $profit = [];
-        foreach ($query->posts as $factories) {
-            $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
+        foreach ($query->posts as $factory) {
+            $profit[] = esc_attr(get_post_meta($factory->ID, '_monthly_profit', true));
         }
-        echo '<h4>Monthly profit: ' . array_sum($profit) . '$</h4>
-                  <h5>Company owns:</h5>';
+        $monthly_profit = '<h4>Monthly profit: ' . array_sum($profit) . '$</h4>';
+        $factories = '<h5>Company owns:</h5>';
         while ($query->have_posts()) {
             $query->the_post();
-            echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br></li>';
+            $factories .= '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br></li>';
         }
     } else {
-        echo '<h4>Monthly profit is unknown.</h4>
-              <h5>Company owns no factories.</h5>';
+        $monthly_profit = '<h4>Monthly profit is unknown.</h4>';
+        $factories = '<h5>Company owns no factories.</h5>';
     }
+    return $res = ['profit' => $monthly_profit,
+        'factories' => $factories,];
 }
 
 //Deleting data on plugin deactivation
