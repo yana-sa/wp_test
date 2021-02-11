@@ -283,7 +283,8 @@ function company_money_transfer_data()
         'id' => get_the_ID(),
         'title' => get_the_title(),
         'balance' => get_post_meta(get_the_ID(), '_balance', true),
-        'link' => get_permalink()];
+        'link' => get_permalink()
+    ];
 
     wp_reset_query();
     $query = new WP_Query(['post_type' => 'companies']);
@@ -292,7 +293,8 @@ function company_money_transfer_data()
         $query->the_post();
         $company = [
             'id' => get_the_ID(),
-            'title' => get_the_title(),];
+            'title' => get_the_title(),
+        ];
         if ($company['id'] !== $current_company['id']) {
             $companies_arr[] = $company;
         }
@@ -303,8 +305,10 @@ function company_money_transfer_data()
         handle_company_money_transfer($transferor_id);
     }
 
-    return ['current' => $current_company,
-        'companies' => $companies_arr];
+    return [
+        'current' => $current_company,
+        'companies' => $companies_arr
+    ];
 }
 
 function handle_company_money_transfer($transferor_id)
@@ -325,7 +329,8 @@ function handle_company_money_transfer($transferor_id)
 function factories_data($term)
 {
     wp_reset_query();
-    $args = ['post_type' => 'factories',
+    $args = [
+        'post_type' => 'factories',
         'company_factories' => $term->slug,
     ];
     $query = new WP_Query($args);
@@ -341,8 +346,10 @@ function factories_data($term)
         ];
         $total_profit += $monthly_profit;
     }
-    return ['profit' => $total_profit,
-        'data' => $factories_data];
+    return [
+        'profit' => $total_profit,
+        'data' => $factories_data
+    ];
 }
 
 function monthly_profit_report_data()
@@ -350,7 +357,8 @@ function monthly_profit_report_data()
     $report_data = [];
     $terms = get_terms([
         'taxonomy' => 'company_factories',
-        'hide_empty' => false,]);
+        'hide_empty' => false,
+        ]);
     foreach ($terms as $term) {
         $factories_data = factories_data($term);
         $report_data[] = [
@@ -387,7 +395,10 @@ function factories_plugin_deactivate()
         wp_delete_post($post_id, true);
     }
 
-    $terms = get_terms('company_factories', ['fields' => 'ids', 'hide_empty' => false]);
+    $terms = get_terms('company_factories', [
+        'fields' => 'ids',
+        'hide_empty' => false
+    ]);
     foreach ($terms as $term) {
         wp_delete_term($term, 'company_factories');
     }

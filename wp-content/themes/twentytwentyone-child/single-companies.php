@@ -33,7 +33,7 @@ get_header();
                 <summary><b>Transfer money</b></summary>
                 <ul>
                 Company's current balance: <b><?php echo $companies_data['current']['balance'] ?>$</b>
-                <form name="transfer_data" method="post" action="<?php $companies_data['current']['link'] ?>">
+                <form name="transfer_data" method="post">
                     The sum to be transferred: <input type="number" id="sum" name="sum">$<br>
                     <label for="companies">Choose a company to transfer money to:</label>
                     <select name="companies" id="companies"><?php
