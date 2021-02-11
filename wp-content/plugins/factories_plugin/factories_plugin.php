@@ -247,22 +247,13 @@ function monthly_profit_report_data()
     $terms = get_terms([
         'taxonomy' => 'company_factories',
         'hide_empty' => false,]);
-
     foreach ($terms as $term) {
         $factories_data = factories_data($term);
-        if ($factories_data !== null) {
-            $report_data[] = [
-                'title' => $term->name,
-                'sum_profit' => $factories_data['profit'],
-                'factories' => $factories_data['data']
-            ];
-        } else {
-            $report_data[] = [
-                'title' => $term->name,
-                'sum_profit' => 0,
-                'factories' => null
-            ];
-        }
+        $report_data[] = [
+            'title' => $term->name,
+            'sum_profit' => ($factories_data !== null) ? $factories_data['profit'] : 0,
+            'factories' => ($factories_data !== null) ? $factories_data['data'] : null,
+        ];
     }
     return $report_data;
 }
@@ -273,16 +264,9 @@ function company_post_data()
     $term = get_term_by('name', get_the_title(), 'company_factories');
     $factories_data = factories_data($term);
 
-    if ($factories_data !== null) {
-        $monthly_profit = $factories_data['profit'];
-        $factories = $factories_data['data'];
-    } else {
-        $monthly_profit = null;
-        $factories = null;
-    }
     return $res = [
-        'profit' => $monthly_profit,
-        'factories' => $factories,
+        'profit' => ($factories_data !== null) ? $factories_data['profit'] : null,
+        'factories' => ($factories_data !== null) ? $factories_data['data'] : null,
     ];
 }
 
