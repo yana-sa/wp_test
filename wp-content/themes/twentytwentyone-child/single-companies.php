@@ -3,6 +3,7 @@
  * Template Name: Company Page
  *
  */
+global $post;
 get_header();
 ?>
 
@@ -26,7 +27,25 @@ get_header();
             } else {?>
                 <h5>Company owns no factories.</h5><?php
             }
-
+            wp_reset_query();
+            $companies_data = company_money_transfer_data(); ?>
+            <details>
+                <summary><b>Transfer money</b></summary>
+                <ul>
+                Company's current balance: <b><?php echo $companies_data['current']['balance'] ?>$</b>
+                <form name="transfer_data" method="post" action="<?php $companies_data['current']['link'] ?>">
+                    The sum to be transferred: <input type="number" id="sum" name="sum">$<br>
+                    <label for="companies">Choose a company to transfer money to:</label>
+                    <select name="companies" id="companies"><?php
+                        foreach ($companies_data['companies'] as $company) { ?>
+                            <option value="<?php echo $company['id'] ?>"><?php echo $company['title'] ?></option>
+                        <?php } ?>
+                    </select><br>
+                    <button name="transfer" value="transfer">Transfer!</button>
+                </form>
+                </ul>
+            </details>
+            <?php
             wp_link_pages(
                 array(
                     'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Post', 'twentytwentyone-child' ) . '">',

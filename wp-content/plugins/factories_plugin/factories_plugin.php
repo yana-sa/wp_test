@@ -31,6 +31,7 @@ function insert_company()
 {
     $ctitle = 'The Company ' . rand(1, 999);
     $randdesc = 'This is a test description ' . rand(1, 999) . '. Date: ' . date("d.m.Y");
+    $randbalance = rand(100000, 1000000);
 
     $cdata = [
         'post_type' => 'companies',
@@ -39,7 +40,9 @@ function insert_company()
         'post_content' => $randdesc,
         'post_status' => 'publish',
     ];
-    wp_insert_post($cdata, true);
+    $post_id = wp_insert_post($cdata, true);
+
+    update_post_meta($post_id, '_balance', $randbalance);
 }
 
 function factories_plugin_activate()
@@ -121,7 +124,7 @@ function create_post_types_and_taxonomy()
             'show_in_menu' => true,
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
-            'register_meta_box_cb' => 'company_selection',]
+            'register_meta_box_cb' => 'balance_box',]
     );
 
     create_taxonomy();
@@ -211,7 +214,7 @@ function companies_selection_meta_box()
 
 add_action('edit_post_factories', 'companies_selection_meta_box', 10, 2);
 
-//Create monthly_profit meta box
+//Create monthly_profit meta box for factories
 function monthly_profit_box()
 {
     add_meta_box(
@@ -228,7 +231,7 @@ add_action('add_meta_boxes_factories', 'monthly_profit_box');
 function monthly_profit_content($post)
 {
     $value = get_post_meta($post->ID, '_monthly_profit', true);
-    echo '<input type="number" style="width:100%" id="monthly_profit" name="monthly_profit" value="' . $value . '">';
+    echo '<input type="number" style="width:95%" id="monthly_profit" name="monthly_profit" value="' . $value . '">$';
 }
 
 function monthly_profit_box_save($post_id)
@@ -241,6 +244,84 @@ function monthly_profit_box_save($post_id)
 }
 
 add_action('save_post', 'monthly_profit_box_save');
+
+//Create balance meta box for companies
+function balance_box()
+{
+    add_meta_box(
+        'balance',
+        __('Blance', 'sitepoint'),
+        'balance_box_content',
+        'companies',
+        'side'
+    );
+}
+
+add_action('add_meta_boxes_factories', 'balance_box');
+
+function balance_box_content($post)
+{
+    $value = get_post_meta($post->ID, '_balance', true);
+    echo '<input type="number" style="width:95%" id="balance" name="balance" value="' . $value . '">$';
+}
+
+function balance_box_save($post_id)
+{
+    $balance = !empty($_POST['balance']) ? $_POST['balance'] : null;
+    if (!isset($balance)) {
+        $balance = 0;
+    }
+    update_post_meta($post_id, '_balance', $balance);
+}
+
+add_action('save_post', 'balance_box_save');
+
+//Transfer money on company post page
+function company_money_transfer_data()
+{
+    $current_company = [
+        'id' => get_the_ID(),
+        'title' => get_the_title(),
+        'balance' => get_post_meta(get_the_ID(), '_balance', true),
+        'link' => get_permalink()];
+
+    wp_reset_query();
+    $query = new WP_Query(['post_type' => 'companies']);
+    $companies_arr = [];
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $company = [
+                'id' => get_the_ID(),
+                'title' => get_the_title(),];
+            if ($company['id'] !== $current_company['id']){
+                $companies_arr[] = $company;
+            }
+        }
+    }
+
+    if (!empty($_POST['transfer_data'])) {
+        $post_id = $current_company['id'];
+        handle_company_money_transfer($post_id);
+    }
+
+    return ['current' => $current_company,
+            'companies' => $companies_arr];
+}
+function handle_company_money_transfer($post_id)
+{
+    $transferor_id = $post_id;
+    $transferee_id = !empty($_POST['companies']) ? $_POST['companies'] : null;
+    $sum = !empty($_POST['sum']) ? $_POST['sum'] : null;
+
+    if (isset($sum)) {
+        $transferor_balance = get_post_meta($transferor_id, '_balance', true);
+        update_post_meta($transferor_id, '_balance', ($transferor_balance - $sum));
+
+        $transferee_balance = get_post_meta($transferee_id, '_balance', true);
+        update_post_meta($transferee_id, '_balance', ($transferee_balance + $sum));
+    }
+}
 
 //Get data for companies report page
 function factories_data($term)
@@ -300,11 +381,10 @@ function company_post_data()
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
 {
-    $query = new WP_Query(array(
+    $query = new WP_Query([
         'post_type' => ['factories', 'companies'],
         'post_status' => 'publish'
-    ));
-
+    ]);
     while ($query->have_posts()) {
         $query->the_post();
         $post_id = get_the_ID();
