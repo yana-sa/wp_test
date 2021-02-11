@@ -216,22 +216,20 @@ function monthly_profit_box_save($post_id)
 add_action('save_post', 'monthly_profit_box_save');
 
 //Get data for companies report page
-function factories_data($query)
+function factories_data($factories_obj)
 {
-    if ($query->have_posts()) {
+    if ($factories_obj->have_posts()) {
         $profit = [];
-        foreach ($query->posts as $factories) {
-            $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
-        }
         $factories_data = [];
-        while ($query->have_posts()) {
-            $query->the_post();
+        while ($factories_obj->have_posts()) {
+            $factories_obj->the_post();
             $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
             $factories_data[] = [
                 'title' => get_the_title(),
                 'link' => get_permalink(),
                 'monthly_profit' => $monthly_profit,
             ];
+            $profit[] = $monthly_profit;
         }
         return ['profit' => $profit,
             'factories_data' => $factories_data];
@@ -251,8 +249,8 @@ function monthly_profit_report_data()
         $args = ['post_type' => 'factories',
             'company_factories' => $term->slug,
         ];
-        $query = new WP_Query($args);
-        $factories_data = (factories_data($query));
+        $factories_obj = new WP_Query($args);
+        $factories_data = (factories_data($factories_obj));
         if ($factories_data !== null) {
             $report_data[] = [
                 'title' => $term->name,
@@ -272,8 +270,8 @@ function company_post_data()
     $args = ['post_type' => 'factories',
         'company_factories' => $term->slug,
     ];
-    $query = new WP_Query($args);
-    $factories_data = (factories_data($query));
+    $factories_obj = new WP_Query($args);
+    $factories_data = (factories_data($factories_obj));
     if ($factories_data !== null) {
         $monthly_profit = '<h4>Monthly profit: ' . array_sum($factories_data['profit']) . '$</h4>';
         $factories = '<h5>Company owns:</h5>';
