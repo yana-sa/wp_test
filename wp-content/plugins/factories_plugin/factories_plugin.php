@@ -224,7 +224,7 @@ function factories_data($term)
     ];
     $query = new WP_Query($args);
     if ($query->have_posts()) {
-        $profit = [];
+        $total_profit = 0;
         $factories_data = [];
         while ($query->have_posts()) {
             $query->the_post();
@@ -234,9 +234,9 @@ function factories_data($term)
                 'link' => get_permalink(),
                 'monthly_profit' => $monthly_profit,
             ];
-            $profit[] = $monthly_profit;
+            $total_profit += $monthly_profit;
         }
-        return ['profit' => $profit,
+        return ['profit' => $total_profit,
             'data' => $factories_data];
     }
 }
@@ -253,7 +253,7 @@ function monthly_profit_report_data()
         if ($factories_data !== null) {
             $report_data[] = [
                 'title' => $term->name,
-                'sum_profit' => array_sum($factories_data['profit']),
+                'sum_profit' => $factories_data['profit'],
                 'factories' => $factories_data['data']
             ];
         } else {
@@ -274,7 +274,7 @@ function company_post_data()
     $factories_data = factories_data($term);
 
     if ($factories_data !== null) {
-        $monthly_profit = array_sum($factories_data['profit']);
+        $monthly_profit = $factories_data['profit'];
         $factories = $factories_data['data'];
     } else {
         $monthly_profit = null;
