@@ -256,6 +256,12 @@ function monthly_profit_report_data()
                 'sum_profit' => array_sum($factories_data['profit']),
                 'factories' => $factories_data['data']
             ];
+        } else {
+            $report_data[] = [
+                'title' => $term->name,
+                'sum_profit' => 0,
+                'factories' => null
+            ];
         }
     }
     return $report_data;

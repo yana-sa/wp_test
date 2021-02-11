@@ -4,7 +4,6 @@
  *
  */
 get_header();
-$report_data = monthly_profit_report_data();
 ?>
 
     <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -15,18 +14,20 @@ $report_data = monthly_profit_report_data();
         </header>
 
         <div class="entry-content alignwide">
-            <?php
+            <?php $report_data = monthly_profit_report_data();
             foreach ($report_data as $company) { ?>
                 <details>
                 <summary><b><?php echo $company['title']; ?></b><br>
                 Total monthly profit: <?php echo $company['sum_profit'] ?>$</summary><?php
-                foreach ($company['factories'] as $factory) { ?>
-                    <ul>
-                    <li><a href="<?php $factory['link'] ?>"><?php echo $factory['title'] ?></a><br>
-                        Monthly profit: <?php echo $factory['monthly_profit'] ?>$
-                    </li>
-                    </ul><?php
-                } ?>
+                if (isset($company['factories'])) {
+                    foreach ($company['factories'] as $factory) { ?>
+                        <ul>
+                        <li><a href="<?php $factory['link'] ?>"><?php echo $factory['title'] ?></a><br>
+                            Monthly profit: <?php echo $factory['monthly_profit'] ?>$
+                        </li>
+                        </ul><?php
+                    }
+                }?>
                 </details><?php
             } ?>
         </div>
