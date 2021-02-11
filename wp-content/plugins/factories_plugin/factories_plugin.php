@@ -54,6 +54,32 @@ function factories_plugin_activate()
 
 register_activation_hook(__FILE__, 'factories_plugin_activate');
 
+function create_money_transfer_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'money_transfer';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		  transferor BIGINT UNSIGNED NOT NULL,
+		  transferee BIGINT UNSIGNED NOT NULL,
+		  sum INT UNSIGNED NOT NULL,
+		  UNIQUE KEY id (id),
+		  
+		FOREIGN KEY (transferee) REFERENCES wp_posts(ID)
+        ON DELETE CASCADE,
+		FOREIGN KEY (transferor) REFERENCES wp_posts(ID)
+		ON DELETE CASCADE
+		) $charset_collate;
+		";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+register_activation_hook(__FILE__, 'create_money_transfer_table');
+
 function create_post_types_and_taxonomy()
 {
     register_post_type('factories', [
@@ -293,3 +319,16 @@ function factories_plugin_deactivate()
 }
 
 register_deactivation_hook(__FILE__, 'factories_plugin_deactivate');
+
+function drop_money_transfer_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'money_transfer';
+
+    $sql = "DROP TABLE IF EXISTS $table_name;";
+    $wpdb->query($sql);
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+}
+
+register_deactivation_hook(__FILE__, 'drop_money_transfer_table');
