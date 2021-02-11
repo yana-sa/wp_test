@@ -215,7 +215,30 @@ function monthly_profit_box_save($post_id)
 
 add_action('save_post', 'monthly_profit_box_save');
 
-//Get data for companies-report.php page
+//Get data for companies report page
+function factories_data($query)
+{
+    if ($query->have_posts()) {
+        $profit = [];
+        foreach ($query->posts as $factories) {
+            $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
+        }
+        $factories_data = [];
+        while ($query->have_posts()) {
+            $query->the_post();
+            $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
+            $factories_data[] = [
+                'title' => get_the_title(),
+                'link' => get_permalink(),
+                'monthly_profit' => $monthly_profit,
+            ];
+        }
+        return ['profit' => $profit,
+            'factories_data' => $factories_data];
+    }
+    return null;
+}
+
 function monthly_profit_report_data()
 {
     $report_data = [];
@@ -229,25 +252,12 @@ function monthly_profit_report_data()
             'company_factories' => $term->slug,
         ];
         $query = new WP_Query($args);
-        if ($query->have_posts()) {
-            $profit = [];
-            foreach ($query->posts as $factories) {
-                $profit[] = esc_attr(get_post_meta($factories->ID, '_monthly_profit', true));
-            }
-            $factories_data = [];
-            while ($query->have_posts()) {
-                $query->the_post();
-                $monthly_profit = esc_attr(get_post_meta(get_the_ID(), '_monthly_profit', true));
-                $factories_data[] = [
-                    'title' => get_the_title(),
-                    'link' => get_permalink(),
-                    'monthly_profit' => $monthly_profit,
-                ];
-            }
+        $factories_data = (factories_data($query));
+        if ($factories_data !== null) {
             $report_data[] = [
                 'title' => $term->name,
-                'sum_profit' => array_sum($profit),
-                'factories' => $factories_data
+                'sum_profit' => array_sum($factories_data['profit']),
+                'factories' => $factories_data['factories_data']
             ];
         }
     }
@@ -263,23 +273,20 @@ function company_post_data()
         'company_factories' => $term->slug,
     ];
     $query = new WP_Query($args);
-    if ($query->have_posts() == true) {
-        $profit = [];
-        foreach ($query->posts as $factory) {
-            $profit[] = esc_attr(get_post_meta($factory->ID, '_monthly_profit', true));
-        }
-        $monthly_profit = '<h4>Monthly profit: ' . array_sum($profit) . '$</h4>';
+    $factories_data = (factories_data($query));
+    if ($factories_data !== null) {
+        $monthly_profit = '<h4>Monthly profit: ' . array_sum($factories_data['profit']) . '$</h4>';
         $factories = '<h5>Company owns:</h5>';
-        while ($query->have_posts()) {
-            $query->the_post();
-            $factories .= '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a><br></li>';
+        foreach ($factories_data['factories_data'] as $factory_data) {
+            $factories .= '<li><a href="' . $factory_data['link'] . '">' . $factory_data['title'] . '</a><br></li>';
         }
     } else {
         $monthly_profit = '<h4>Monthly profit is unknown.</h4>';
         $factories = '<h5>Company owns no factories.</h5>';
     }
     return $res = ['profit' => $monthly_profit,
-        'factories' => $factories,];
+        'factories' => $factories,
+    ];
 }
 
 //Deleting data on plugin deactivation
