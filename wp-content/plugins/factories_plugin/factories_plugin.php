@@ -281,9 +281,7 @@ function company_money_transfer_data()
 {
     $current_company = [
         'id' => get_the_ID(),
-        'title' => get_the_title(),
         'balance' => get_post_meta(get_the_ID(), '_balance', true),
-        'link' => get_permalink()
     ];
 
     wp_reset_query();
@@ -300,11 +298,6 @@ function company_money_transfer_data()
         }
     }
 
-    if (!empty($_POST['transfer_data'])) {
-        $transferor_id = $current_company['id'];
-        handle_company_money_transfer($transferor_id);
-    }
-
     return [
         'current' => $current_company,
         'companies' => $companies_arr
@@ -313,16 +306,45 @@ function company_money_transfer_data()
 
 function handle_company_money_transfer($transferor_id)
 {
-    $transferee_id = !empty($_POST['companies']) ? $_POST['companies'] : null;
-    $sum = !empty($_POST['sum']) ? $_POST['sum'] : null;
-
-    if (isset($sum)) {
-        $transferor_balance = get_post_meta($transferor_id, '_balance', true);
-        update_post_meta($transferor_id, '_balance', ($transferor_balance - $sum));
-
-        $transferee_balance = get_post_meta($transferee_id, '_balance', true);
-        update_post_meta($transferee_id, '_balance', ($transferee_balance + $sum));
+    global $wpdb;
+    if (empty($_POST['transfer'])) {
+        return;
     }
+
+    $transferee_id = !empty($_POST['select_company']) ? $_POST['select_company'] : null;
+    $sum = !empty($_POST['sum']) ? $_POST['sum'] : null;
+    $transferor_balance = get_post_meta($transferor_id, '_balance', true);
+    $transferee_balance = get_post_meta($transferee_id, '_balance', true);
+
+    if (isset($sum) && $transferor_balance >= $sum) {
+        $upd_transferor_balance = $transferor_balance - $sum;
+        update_post_meta($transferor_id, '_balance', $upd_transferor_balance);
+
+        $upd_transferee_balance = $transferee_balance + $sum;
+        update_post_meta($transferee_id, '_balance', $upd_transferee_balance);
+
+        $wpdb->insert('wp_money_transfer', ['transferor_id' => $transferor_id, 'transferee_id' => $transferee_id, 'sum' => $sum], ['%d']);
+    } else {
+        echo 'Double-check the balance and the sum to be transferred!';
+    }
+}
+
+// Get data for money transfer logs page
+function money_transfer_logs()
+{
+    global $wpdb;
+    $transfer_logs = $wpdb->get_results( "SELECT `transferor_id`, `transferee_id`, `sum`, `date` FROM `wp_money_transfer`", ARRAY_A );
+    $logs = [];
+    foreach ($transfer_logs as $transfer_log) {
+        $date = strtotime($transfer_log['date']);
+        $logs[] = [
+            'transferor' => get_the_title($transfer_log['transferor_id']),
+            'transferee' => get_the_title($transfer_log['transferee_id']),
+            'sum' => $transfer_log['sum'] . ' $',
+            'date' => date("d.m.Y H:i", $date)
+        ];
+    }
+    return $logs;
 }
 
 //Get data for companies report page

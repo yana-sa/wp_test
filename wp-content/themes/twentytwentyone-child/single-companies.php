@@ -28,24 +28,29 @@ get_header();
                 <h5>Company owns no factories.</h5><?php
             }
             wp_reset_query();
-            $companies_data = company_money_transfer_data(); ?>
+            $companies_data = company_money_transfer_data();
+            $transferor_id = $companies_data['current']['id'];
+            ?>
             <details>
-                <summary><b>Transfer money</b></summary>
+                <summary class="transfer-dropdown">
+                    <b>Transfer money</b></summary>
                 <ul>
-                Company's current balance: <b><?php echo $companies_data['current']['balance'] ?>$</b>
-                <form name="transfer_data" method="post">
-                    The sum to be transferred: <input type="number" id="sum" name="sum">$<br>
-                    <label for="companies">Choose a company to transfer money to:</label>
-                    <select name="companies" id="companies"><?php
-                        foreach ($companies_data['companies'] as $company) { ?>
-                            <option value="<?php echo $company['id'] ?>"><?php echo $company['title'] ?></option>
-                        <?php } ?>
-                    </select><br>
-                    <button name="transfer" value="transfer">Transfer!</button>
-                </form>
+                    <form class="transfer_data" name="transfer_data" method="post">
+                        Company's current balance: <b><?php echo $companies_data['current']['balance'] ?>$</b><br>
+                        The sum to transfer: <input type="number" id="sum" name="sum">$<br>
+                        <label for="select_company">Choose a company to transfer money to:</label>
+                        <select name="select_company" id="select_company"><?php
+                            foreach ($companies_data['companies'] as $company) { ?>
+                                <option value="<?php echo $company['id'] ?>"><?php echo $company['title'] ?></option>
+                            <?php } ?>
+                        </select><br>
+                        <button name="transfer" value="transfer" class="transfer-btn">Transfer!</button>
+                    </form>
                 </ul>
             </details>
             <?php
+            handle_company_money_transfer($transferor_id);
+
             wp_link_pages(
                 array(
                     'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Post', 'twentytwentyone-child' ) . '">',

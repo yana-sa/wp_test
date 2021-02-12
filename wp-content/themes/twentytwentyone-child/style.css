@@ -8,3 +8,30 @@ Template: twentytwentyone
 Version: 1.0.0
 Text Domain: twentytwentyone-child
 */
+
+body {
+    background-color: #ccc7e0;
+}
+.transfer-dropdown {
+    background-color: white;
+    border: solid;
+    padding-inline: 10px;
+}
+
+.transfer-btn {
+    background-color: white;
+    padding-inline: 30px;
+    padding-block: 15px;
+    border: solid;
+    font-weight: bold;
+}
+
+.tablediv {
+    width: 80%;
+    margin: auto;
+}
+
+table {
+    background-color: white;
+    border: solid;
+}
