@@ -307,16 +307,16 @@ function company_money_transfer_data()
 function handle_company_money_transfer($transferor_id)
 {
     global $wpdb;
-    if (empty($_POST['transfer'])) {
+    if (empty($_POST['transfer']) || empty($_POST['select_company']) || empty($_POST['sum'])) {
         return;
     }
 
-    $transferee_id = !empty($_POST['select_company']) ? $_POST['select_company'] : null;
-    $sum = !empty($_POST['sum']) ? $_POST['sum'] : null;
+    $transferee_id = $_POST['select_company'];
+    $sum = $_POST['sum'];
     $transferor_balance = get_post_meta($transferor_id, '_balance', true);
     $transferee_balance = get_post_meta($transferee_id, '_balance', true);
 
-    if (isset($sum) && $transferor_balance >= $sum) {
+    if ($transferor_balance >= $sum) {
         $upd_transferor_balance = $transferor_balance - $sum;
         update_post_meta($transferor_id, '_balance', $upd_transferor_balance);
 
@@ -333,14 +333,14 @@ function handle_company_money_transfer($transferor_id)
 function money_transfer_logs()
 {
     global $wpdb;
-    $transfer_logs = $wpdb->get_results( "SELECT `transferor_id`, `transferee_id`, `sum`, `date` FROM `wp_money_transfer`", ARRAY_A );
+    $raw_logs = $wpdb->get_results("SELECT `transferor_id`, `transferee_id`, `sum`, `date` FROM `wp_money_transfer`", ARRAY_A);
     $logs = [];
-    foreach ($transfer_logs as $transfer_log) {
-        $date = strtotime($transfer_log['date']);
+    foreach ($raw_logs as $raw_log) {
+        $date = strtotime($raw_log['date']);
         $logs[] = [
-            'transferor' => get_the_title($transfer_log['transferor_id']),
-            'transferee' => get_the_title($transfer_log['transferee_id']),
-            'sum' => $transfer_log['sum'] . ' $',
+            'transferor' => get_the_title($raw_log['transferor_id']),
+            'transferee' => get_the_title($raw_log['transferee_id']),
+            'sum' => $raw_log['sum'] . ' $',
             'date' => date("d.m.Y H:i", $date)
         ];
     }
@@ -380,7 +380,7 @@ function monthly_profit_report_data()
     $terms = get_terms([
         'taxonomy' => 'company_factories',
         'hide_empty' => false,
-        ]);
+    ]);
     foreach ($terms as $term) {
         $factories_data = factories_data($term);
         $report_data[] = [
