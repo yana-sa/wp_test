@@ -291,12 +291,13 @@ add_action('save_post', 'top_for_books_box_save');
 function display_top_for_books($title)
 {
     global $post;
-    $top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
+    if (!empty($post)) {
+        $top_for_books = esc_attr(get_post_meta($post->ID, '_top_for_books', true));
+        if (($top_for_books == '1') && !is_admin()) {
+            $title = '&#11088' . $title;
 
-    if (($top_for_books == '1') && !is_admin()) {
-        $title = '&#11088' . $title;
-
-        return $title;
+            return $title;
+        }
     }
 
     return $title;
