@@ -358,7 +358,7 @@ function admin_money_transfer_logs()
         'Money transfer',
         'manage_options',
         'money-transfer-logs',
-        'display_admin_money_transfer_logs',
+        'admin_money_transfer_cancellation',
         'dashicons-format-aside',
         8);
 }
@@ -367,15 +367,7 @@ add_action( 'admin_menu', 'admin_money_transfer_logs' );
 
 function display_admin_money_transfer_logs()
 {
-    require_once 'views/admin/money-transfer.php';
-    if (!current_user_can('manage_options'))
-    {
-        wp_die( __('You do not have sufficient permissions to access this page.') );
-    }
-
     global $wpdb;
-    admin_money_transfer_cancellation($wpdb);
-
     $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
     $logs = [];
 
@@ -393,8 +385,14 @@ function display_admin_money_transfer_logs()
     return $logs;
 }
 
-function admin_money_transfer_cancellation($wpdb)
+function admin_money_transfer_cancellation()
 {
+    if (!current_user_can('manage_options'))
+    {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+
+    global $wpdb;
     if (!isset($_POST['log_id']) && !isset($_POST['cancel'])) {
         return;
     }
@@ -414,7 +412,10 @@ function admin_money_transfer_cancellation($wpdb)
 
     $wpdb->delete('wp_money_transfer', ['id' => $_POST['log_id']], ['%d']);
     echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
+
+    require_once 'views/admin/money-transfer.php';
 }
+
 //Get data for companies report page
 function factories_data($term)
 {
