@@ -375,7 +375,7 @@ function admin_money_transfer_cancellation()
 
     handle_admin_money_transfer_cancellation();
 
-    $logs = money_transfer_logs();
+    money_transfer_logs();
     require_once 'views/admin/money-transfer.php';
 }
 

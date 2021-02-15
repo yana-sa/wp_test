@@ -1,5 +1,6 @@
 <?php
 wp_head();
+global $logs;
 ?>
     <header class="entry-header alignwide">
         <h2 style="text-align: center;">Money transfer logs</h2>
