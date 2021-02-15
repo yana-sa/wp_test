@@ -335,7 +335,6 @@ function handle_company_money_transfer($transferor_id)
 function money_transfer_logs()
 {
     global $wpdb;
-    global $logs;
     $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
     $logs = [];
 
@@ -374,8 +373,6 @@ function admin_money_transfer_cancellation()
     }
 
     handle_admin_money_transfer_cancellation();
-
-    money_transfer_logs();
     require_once 'views/admin/money-transfer.php';
 }
 
