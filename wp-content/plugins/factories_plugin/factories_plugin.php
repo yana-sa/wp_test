@@ -351,6 +351,77 @@ function money_transfer_logs()
     return $logs;
 }
 
+//Add transfer money logs admin page
+function admin_money_transfer_logs()
+{
+    add_menu_page( 'Money transfer logs',
+        'Money transfer',
+        'manage_options',
+        'money-transfer-logs',
+        'display_admin_money_transfer_logs',
+        'dashicons-format-aside',
+        8);
+}
+
+add_action( 'admin_menu', 'admin_money_transfer_logs' );
+
+function display_admin_money_transfer_logs()
+{
+    if (!current_user_can('manage_options'))
+    {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+
+    global $wpdb;
+    handle_money_transfer_cancellation($wpdb);
+    $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
+    $logs = [];
+    foreach ($raw_logs as $raw_log) {
+        $date = strtotime($raw_log['date']);
+        $logs[] = [
+            'id' => $raw_log['id'],
+            'transferor' => get_the_title($raw_log['transferor_id']),
+            'transferee' => get_the_title($raw_log['transferee_id']),
+            'sum' => $raw_log['sum'] . ' $',
+            'date' => date("d.m.Y H:i", $date)
+        ];
+    }?>
+    <header class="entry-header alignwide">
+        <h2>Money transfer logs</h2>
+    </header>
+
+    <div class="tablediv">
+        <table>
+            <tr>
+                <th>Transferor</th>
+                <th>Transferee</th>
+                <th>Sum</th>
+                <th>Date and time</th>
+            </tr>
+            <?php foreach ($logs as $log) { ?>
+                <tr>
+                    <td><?php echo $log['transferor']; ?></td>
+                    <td><?php echo $log['transferee']; ?></td>
+                    <td><?php echo $log['sum']; ?></td>
+                    <td><?php echo $log['date']; ?></td>
+                    <td><button formmethod="post" name="cancel" id="cancel" value="<?php echo $log['id']; ?>">Cancel</button>
+                    </td>
+                </tr>
+            <?php } ?>
+        </table>
+    </div>
+<?php
+}
+
+function handle_money_transfer_cancellation($wpdb)
+{
+    $log_id = $_POST['cancel'];
+    if (isset($log_id)) {
+        $wpdb->delete('wp_money_transfer', ['id' => $log_id], ['%d']);
+        echo '<div class="updated"><p><strong>Saved!</strong></p></div>';
+    }
+}
+
 //Get data for companies report page
 function factories_data($term)
 {
