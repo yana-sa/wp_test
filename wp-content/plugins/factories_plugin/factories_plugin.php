@@ -368,6 +368,7 @@ add_action( 'admin_menu', 'admin_money_transfer_logs' );
 function display_admin_money_transfer_logs()
 {
     global $wpdb;
+    global $logs;
     $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
     $logs = [];
 
@@ -387,32 +388,30 @@ function display_admin_money_transfer_logs()
 
 function admin_money_transfer_cancellation()
 {
-    if (!current_user_can('manage_options'))
-    {
+    if (!current_user_can('manage_options')) {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
 
     global $wpdb;
-    if (!isset($_POST['log_id']) && !isset($_POST['cancel'])) {
-        return;
+    if (isset($_POST['log_id']) && isset($_POST['cancel'])) {
+        $log_id = $_POST['log_id'];
+        $log = $wpdb->get_row("SELECT `transferor_id`, `transferee_id`, `sum` FROM `wp_money_transfer` WHERE id = $log_id", ARRAY_A);
+
+        $transferor_id = $log['transferor_id'];
+        $transferee_id = $log['transferee_id'];
+        $sum = $log['sum'];
+
+        $transferor_balance = get_post_meta($transferor_id, '_balance', true);
+        $transferee_balance = get_post_meta($transferee_id, '_balance', true);
+
+        update_post_meta($transferor_id, '_balance', $transferor_balance + $sum);
+        update_post_meta($transferee_id, '_balance', $transferee_balance - $sum);
+
+        $wpdb->delete('wp_money_transfer', ['id' => $_POST['log_id']], ['%d']);
+        echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
     }
 
-    $log_id = $_POST['log_id'];
-    $log = $wpdb->get_row( "SELECT `transferor_id`, `transferee_id`, `sum` FROM `wp_money_transfer` WHERE id = $log_id", ARRAY_A);
-
-    $transferor_id = $log['transferor_id'];
-    $transferee_id = $log['transferee_id'];
-    $sum = $log['sum'];
-
-    $transferor_balance = get_post_meta($transferor_id, '_balance', true);
-    $transferee_balance = get_post_meta($transferee_id, '_balance', true);
-
-    update_post_meta($transferor_id, '_balance', $transferor_balance + $sum);
-    update_post_meta($transferee_id, '_balance', $transferee_balance - $sum);
-
-    $wpdb->delete('wp_money_transfer', ['id' => $_POST['log_id']], ['%d']);
-    echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
-
+    $logs = display_admin_money_transfer_logs();
     require_once 'views/admin/money-transfer.php';
 }
 
