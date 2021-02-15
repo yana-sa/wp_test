@@ -335,12 +335,14 @@ function handle_company_money_transfer($transferor_id)
 function money_transfer_logs()
 {
     global $wpdb;
-    $raw_logs = $wpdb->get_results("SELECT `transferor_id`, `transferee_id`, `sum`, `date` FROM `wp_money_transfer`", ARRAY_A);
+    global $logs;
+    $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
     $logs = [];
 
     foreach ($raw_logs as $raw_log) {
         $date = strtotime($raw_log['date']);
         $logs[] = [
+            'id' => $raw_log['id'],
             'transferor' => get_the_title($raw_log['transferor_id']),
             'transferee' => get_the_title($raw_log['transferee_id']),
             'sum' => $raw_log['sum'] . ' $',
@@ -365,33 +367,20 @@ function admin_money_transfer_logs()
 
 add_action( 'admin_menu', 'admin_money_transfer_logs' );
 
-function display_admin_money_transfer_logs()
-{
-    global $wpdb;
-    global $logs;
-    $raw_logs = $wpdb->get_results("SELECT * FROM `wp_money_transfer`", ARRAY_A);
-    $logs = [];
-
-    foreach ($raw_logs as $raw_log) {
-        $date = strtotime($raw_log['date']);
-        $logs[] = [
-            'id' => $raw_log['id'],
-            'transferor' => get_the_title($raw_log['transferor_id']),
-            'transferee' => get_the_title($raw_log['transferee_id']),
-            'sum' => $raw_log['sum'] . ' $',
-            'date' => date("d.m.Y H:i", $date)
-        ];
-    }
-
-    return $logs;
-}
-
 function admin_money_transfer_cancellation()
 {
     if (!current_user_can('manage_options')) {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
 
+    handle_admin_money_transfer_cancellation();
+
+    $logs = money_transfer_logs();
+    require_once 'views/admin/money-transfer.php';
+}
+
+function handle_admin_money_transfer_cancellation()
+{
     global $wpdb;
     if (isset($_POST['log_id']) && isset($_POST['cancel'])) {
         $log_id = $_POST['log_id'];
@@ -410,9 +399,6 @@ function admin_money_transfer_cancellation()
         $wpdb->delete('wp_money_transfer', ['id' => $_POST['log_id']], ['%d']);
         echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
     }
-
-    $logs = display_admin_money_transfer_logs();
-    require_once 'views/admin/money-transfer.php';
 }
 
 //Get data for companies report page

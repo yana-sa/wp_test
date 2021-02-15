@@ -6,7 +6,7 @@ wp_head();
     </header>
 
     <div class="tablediv">
-        <table>
+        <table style="text-align: center;">
             <tr>
                 <th>Transferor</th>
                 <th>Transferee</th>
@@ -21,7 +21,7 @@ wp_head();
                     <td><?php echo $log['sum']; ?></td>
                     <td><?php echo $log['date']; ?></td>
                     <td><form method="post">
-                        <input type="submit" name="cancel" id="cancel" value="Cancel!">
+                        <input type="submit" name="cancel" id="cancel" value="Cancel">
                         <input type="hidden" name="log_id" id="log_id" value="<?php echo $log['id']; ?>"></form>
                     </td>
                 </tr>
