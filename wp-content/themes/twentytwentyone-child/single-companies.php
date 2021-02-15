@@ -29,13 +29,12 @@ get_header();
             }
             wp_reset_query();
             $companies_data = company_money_transfer_data();
-            $transferor_id = $companies_data['current']['id'];
             ?>
             <details>
                 <summary class="transfer-dropdown">
                     <b>Transfer money</b></summary>
                 <ul>
-                    <form class="transfer_data" name="transfer_data" method="post">
+                    <form method="post">
                         Company's current balance: <b><?php echo $companies_data['current']['balance'] ?>$</b><br>
                         The sum to transfer: <input type="number" id="sum" name="sum">$<br>
                         <label for="select_company">Choose a company to transfer money to:</label>
@@ -44,11 +43,12 @@ get_header();
                                 <option value="<?php echo $company['id'] ?>"><?php echo $company['title'] ?></option>
                             <?php } ?>
                         </select><br>
-                        <button name="transfer" value="transfer" class="transfer-btn">Transfer!</button>
+                        <input type="submit" id="transfer" name="transfer" value="Transfer!">
                     </form>
                 </ul>
             </details>
             <?php
+            $transferor_id = $companies_data['current']['id'];
             handle_company_money_transfer($transferor_id);
 
             wp_link_pages(
