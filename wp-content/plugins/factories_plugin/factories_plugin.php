@@ -162,7 +162,8 @@ function insert_taxonomies($post_id, $post, $update)
     if ($update == true) {
         return;
     }
-    if ($post->post_type == 'companies' && $post->post_status == 'publish') {
+
+    if ($post->post_type == 'companies' && $post->post_status == 'publish' && isset($post_id)) {
         wp_insert_term(
             $post->post_title,
             'company_factories',
@@ -331,7 +332,7 @@ function handle_company_money_transfer($transferor_id)
     }
 }
 
-// Get data for money transfer logs page
+//Get data for money transfer logs page
 function money_transfer_logs()
 {
     global $wpdb;
@@ -356,7 +357,7 @@ function money_transfer_logs()
 function admin_money_transfer_logs()
 {
     add_menu_page( 'Money transfer logs',
-        'Money transfer',
+        'Transfer logs',
         'manage_options',
         'money-transfer-logs',
         'admin_money_transfer_cancellation',
@@ -396,6 +397,49 @@ function handle_admin_money_transfer_cancellation()
         $wpdb->delete('wp_money_transfer', ['id' => $_POST['log_id']], ['%d']);
         echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
     }
+}
+//Add money transfer logs report
+function admin_logs_report()
+{
+    add_menu_page( 'Report for money transfer logs',
+        'Monthly reports',
+        'manage_options',
+        'logs-report',
+        'admin_money_transfer_logs_report',
+        'dashicons-format-aside',
+        8);
+}
+
+add_action( 'admin_menu', 'admin_logs_report' );
+
+function admin_money_transfer_logs_report()
+{
+    global $wpdb;
+    wp_reset_query();
+    $query = new WP_Query(['post_type' => 'companies']);
+    $report = [];
+    while ($query->have_posts()) {
+        $query->the_post();
+        $company_id = get_the_ID();
+        $company = get_the_title();
+        $profit = $wpdb->get_results(
+            "SELECT SUM(`sum`) AS `profit`, MONTH(`date`) AS `month` 
+                        FROM `wp_money_transfer` 
+                        WHERE YEAR(`date`) = 2021 AND `transferee_id` = $company_id
+                            GROUP BY `month`;",
+            ARRAY_A);
+        $loss = $wpdb->get_results(
+            "SELECT SUM(`sum`) AS `loss`, MONTH(`date`) AS `month` 
+                        FROM `wp_money_transfer` 
+                        WHERE YEAR(`date`) = 2021 AND `transferor_id` = $company_id
+                            GROUP BY `month`;",
+            ARRAY_A);
+        $report[] = ['company' => $company,
+            'data' => array_merge($profit, $loss)];
+    }
+
+    require_once 'views/admin/logs-report.php';
+    return $report;
 }
 
 //Get data for companies report page

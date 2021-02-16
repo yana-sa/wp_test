@@ -19,7 +19,7 @@ get_header();
         <div class="entry-content">
             <?php the_content();
             $factories = $company_data['factories'];
-            if ($factories !== null) { ?>
+            if (!empty($factories)) { ?>
                 <h5>Company owns:</h5>
                 <?php foreach ($factories as $factory) {?>
                 <li><a href="<?php $factory['link'] ?>"><?php echo $factory['title'] ?></a><br></li><?php
