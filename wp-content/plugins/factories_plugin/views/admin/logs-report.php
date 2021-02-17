@@ -1,7 +1,6 @@
 <?php
 wp_head();
 $report = admin_money_transfer_logs_report();
-print_r($report);
 ?>
 <header class="entry-header alignwide">
     <h2 style="text-align: center;">Transfer report</h2>
@@ -24,11 +23,10 @@ print_r($report);
             <th>Nov</th>
             <th>Dec</th>
         </tr>
-            <?php foreach($report as $single_report) { ?>
+            <?php foreach($report as $data) { ?>
             <tr>
-                <td><?php echo $single_report['company']; ?></td>
-                <?php for($i=1; $i<=12; $i++) {
-                foreach ($single_report['data'] as $data) { ?>
+                <td><?php echo $data['company'];
+                    for($i=1; $i<=12; $i++) {?></td>
                 <td ><?php
                     $profit = isset($data['profit']) ? $data['profit'] : '0';
                     $loss = isset($data['loss']) ? $data['loss'] : '0';
@@ -38,8 +36,6 @@ print_r($report);
                         echo '+0$ / -0$';
                     }
                 } ?></td>
-            <?php
-                } ?>
             </tr>
         <?php }?>
     </table>

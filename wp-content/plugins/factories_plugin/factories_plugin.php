@@ -415,28 +415,32 @@ add_action( 'admin_menu', 'admin_logs_report' );
 function admin_money_transfer_logs_report()
 {
     global $wpdb;
-    wp_reset_query();
-    $query = new WP_Query(['post_type' => 'companies']);
-    $report = [];
-    while ($query->have_posts()) {
-        $query->the_post();
-        $company_id = get_the_ID();
-        $company = get_the_title();
-        $profit = $wpdb->get_results(
-            "SELECT SUM(`sum`) AS `profit`, MONTH(`date`) AS `month` 
-                        FROM `wp_money_transfer` 
-                        WHERE YEAR(`date`) = 2021 AND `transferee_id` = $company_id
-                            GROUP BY `month`;",
+    $report = $wpdb->get_results(
+        "SELECT company, MAX(profit) AS profit, MAX(loss) AS loss, `month`
+            FROM
+            (SELECT p.post_title AS `company`, SUM(tr.`sum`) AS `profit`, 0 as `loss`, 
+                    MONTH(tr.`date`) AS `month`
+                FROM wp_money_transfer tr
+                
+                INNER JOIN wp_posts p
+                ON p.ID = tr.transferee_id
+                
+                WHERE YEAR(tr.`date`) = 2021
+                GROUP BY company, `month`
+                
+                UNION ALL
+                
+                SELECT p.post_title AS `company`, 0 AS `profit`, SUM(tr.`sum`) AS `loss`, MONTH(tr.`date`) AS `month`
+                FROM wp_money_transfer tr
+                
+                INNER JOIN wp_posts p
+                ON p.ID = tr.transferor_id
+                   
+                WHERE YEAR(tr.`date`) = 2021
+                GROUP BY company, `month`
+            ) res
+            GROUP BY company, `month`",
             ARRAY_A);
-        $loss = $wpdb->get_results(
-            "SELECT SUM(`sum`) AS `loss`, MONTH(`date`) AS `month` 
-                        FROM `wp_money_transfer` 
-                        WHERE YEAR(`date`) = 2021 AND `transferor_id` = $company_id
-                            GROUP BY `month`;",
-            ARRAY_A);
-        $report[] = ['company' => $company,
-            'data' => array_merge($profit, $loss)];
-    }
 
     require_once 'views/admin/logs-report.php';
     return $report;
