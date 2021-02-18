@@ -84,6 +84,33 @@ function create_money_transfer_table()
 
 register_activation_hook(__FILE__, 'create_money_transfer_table');
 
+function create_company_shares_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'company_shares';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+		  company_id BIGINT UNSIGNED NOT NULL,
+		  user_id BIGINT UNSIGNED NOT NULL,
+		  sum INT UNSIGNED NOT NULL,
+          date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          UNIQUE KEY id (id),
+		  
+		FOREIGN KEY (company_id) REFERENCES wp_posts(ID)
+        ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES wp_users(ID)
+		ON DELETE CASCADE
+		) $charset_collate;
+		";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+register_activation_hook(__FILE__, 'create_company_shares_table');
+
 function create_post_types_and_taxonomy()
 {
     register_post_type('factories', [
@@ -523,6 +550,46 @@ function company_post_data()
     ];
 }
 
+//Add Balance custom field for users
+function user_balance_field($user) { ?>
+    <label for="balance"><h3>Balance</h3></label>
+    <input type="number" name="balance" id="balance" value="<?php echo get_the_author_meta('balance', $user->ID); ?>" />$<br />
+<?php }
+
+add_action( 'show_user_profile', 'user_balance_field' );
+add_action( 'edit_user_profile', 'user_balance_field' );
+
+function save_user_balance_field( $user_id )
+{
+    if (!is_admin($user_id)){
+        return false;
+    }
+    update_user_meta( $user_id, 'balance', $_POST['balance'] );
+}
+
+add_action( 'personal_options_update', 'save_user_balance_field' );
+add_action( 'edit_user_profile_update', 'save_user_balance_field' );
+
+//Display shares on company post page
+function company_investors_data($post)
+{
+    global $wpdb;
+    $raw_data = $wpdb->get_results("SELECT user_id, `sum`, `date` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
+    $data = [];
+
+    foreach ($raw_data as $d) {
+        $user = get_userdata($d['user_id']);
+        $date = strtotime($d['date']);
+        $data[] = [
+            'user' => $user->display_name,
+            'sum' => $d['sum'] . '$',
+            'date' => date("d.m.Y", $date)
+        ];
+    }
+
+    return $data;
+}
+
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
 {
@@ -551,15 +618,17 @@ function factories_plugin_deactivate()
 
 register_deactivation_hook(__FILE__, 'factories_plugin_deactivate');
 
-function drop_money_transfer_table()
+function drop_custom_tables()
 {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'money_transfer';
+    $table1_name = $wpdb->prefix . 'money_transfer';
+    $table2_name = $wpdb->prefix . 'company_shares';
 
-    $sql = "DROP TABLE IF EXISTS $table_name;";
+    $sql = "DROP TABLE IF EXISTS $table1_name
+            DROP TABLE IF EXISTS $table2_name;";
     $wpdb->query($sql);
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 }
 
-register_deactivation_hook(__FILE__, 'drop_money_transfer_table');
+register_deactivation_hook(__FILE__, 'drop_custom_tables');

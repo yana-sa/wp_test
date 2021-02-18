@@ -58,10 +58,27 @@ get_header();
                     /* translators: %: page number. */
                     'postlink' => esc_html__( 'Post %', 'twentytwentyone-child' ),
                 )
-            ); ?>
+            );
+            wp_reset_query();
+            $invest_data = company_investors_data($post);?>
+        <table>
+            <tr>
+                <th>Investor</th>
+                <th>Sum</th>
+                <th>Date</th>
+            </tr>
+            <?php foreach ($invest_data as $data) { ?>
+                <tr>
+                    <td><?php echo $data['user']?></td>
+                    <td><?php echo $data['sum']?></td>
+                    <td><?php echo $data['date']?></td>
+                </tr>
+            <?php } ?>
+        </table>
         </div><!-- .entry-content -->
+
+
         <footer class="entry-footer default-max-width">
-            <?php twenty_twenty_one_entry_meta_footer(); ?>
         </footer><!-- .entry-footer -->
 
         <?php if ( ! is_singular( 'attachment' ) ) : ?>
