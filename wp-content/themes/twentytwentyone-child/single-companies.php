@@ -60,18 +60,18 @@ get_header();
                 )
             );
             wp_reset_query();
-            $invest_data = company_investors_data($post);?>
+            $shares = company_investors_data($post);?>
         <table>
             <tr>
                 <th>Investor</th>
                 <th>Shares</th>
                 <th>Date</th>
             </tr>
-            <?php foreach ($invest_data as $data) { ?>
+            <?php foreach ($shares as $share) { ?>
                 <tr>
-                    <td><?php echo $data['user']?></td>
-                    <td><?php echo $data['sum']?></td>
-                    <td><?php echo $data['date']?></td>
+                    <td><?php echo $share['user']?></td>
+                    <td><?php echo $share['sum']?></td>
+                    <td><?php echo $share['date']?></td>
                 </tr>
             <?php } ?>
         </table>
