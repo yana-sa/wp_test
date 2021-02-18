@@ -64,7 +64,7 @@ get_header();
         <table>
             <tr>
                 <th>Investor</th>
-                <th>Sum</th>
+                <th>Shares</th>
                 <th>Date</th>
             </tr>
             <?php foreach ($invest_data as $data) { ?>

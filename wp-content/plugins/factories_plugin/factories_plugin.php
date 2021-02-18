@@ -551,24 +551,26 @@ function company_post_data()
 }
 
 //Add Balance custom field for users
-function user_balance_field($user) { ?>
+function user_balance_field($user)
+{ ?>
     <label for="balance"><h3>Balance</h3></label>
-    <input type="number" name="balance" id="balance" value="<?php echo get_the_author_meta('balance', $user->ID); ?>" />$<br />
+    <input type="number" name="balance" id="balance" value="<?php echo get_the_author_meta('balance', $user->ID); ?>"/>$
+    <br/>
 <?php }
 
-add_action( 'show_user_profile', 'user_balance_field' );
-add_action( 'edit_user_profile', 'user_balance_field' );
+add_action('show_user_profile', 'user_balance_field');
+add_action('edit_user_profile', 'user_balance_field');
 
-function save_user_balance_field( $user_id )
+function save_user_balance_field($user_id)
 {
-    if (!is_admin($user_id)){
+    if (!is_admin($user_id)) {
         return false;
     }
-    update_user_meta( $user_id, 'balance', $_POST['balance'] );
+    update_user_meta($user_id, 'balance', $_POST['balance']);
 }
 
-add_action( 'personal_options_update', 'save_user_balance_field' );
-add_action( 'edit_user_profile_update', 'save_user_balance_field' );
+add_action('personal_options_update', 'save_user_balance_field');
+add_action('edit_user_profile_update', 'save_user_balance_field');
 
 //Display shares on company post page
 function company_investors_data($post)
@@ -577,12 +579,12 @@ function company_investors_data($post)
     $raw_data = $wpdb->get_results("SELECT user_id, `sum`, `date` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
     $data = [];
 
-    foreach ($raw_data as $d) {
-        $user = get_userdata($d['user_id']);
-        $date = strtotime($d['date']);
+    foreach ($raw_data as $share) {
+        $user = get_userdata($share['user_id']);
+        $date = strtotime($share['date']);
         $data[] = [
             'user' => $user->display_name,
-            'sum' => $d['sum'] . '$',
+            'sum' => $share['sum'],
             'date' => date("d.m.Y", $date)
         ];
     }
