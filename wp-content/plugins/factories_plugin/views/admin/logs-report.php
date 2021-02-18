@@ -27,7 +27,7 @@ $report = admin_money_transfer_logs_report();
             <tr>
                 <td><?php echo $company;
                     foreach ($data as $month => $d) {?></td>
-                <td><?php echo $d; ?></td>
+                <td><?php echo (!empty($d) ? $d : '+0$ / -0$')?></td>
                 <?php }?>
             </tr>
         <?php } ?>
