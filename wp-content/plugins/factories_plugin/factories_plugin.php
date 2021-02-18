@@ -448,7 +448,11 @@ function admin_money_transfer_logs_report()
     foreach ($report as $k => $v) {
         $report_upd[$k] = [
             'company' => $v['company'],
-            'data' => [array_slice($v, -3, 3, true)]
+            'data' => [[
+                'profit' => $v['profit'],
+                'loss' => $v['loss'],
+                'month' => $v['month']
+            ]]
         ];
 
         if (isset($report_upd[$k - 1]) && $report_upd[$k]['company'] == $report_upd[$k - 1]['company']) {
