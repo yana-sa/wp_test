@@ -269,7 +269,7 @@ function balance_box_content($post)
 function balance_box_save($post_id)
 {
     $balance = $_POST['balance'];
-        if (!isset($balance)) {
+    if (!isset($balance)) {
         $balance = 0;
     }
 
@@ -356,7 +356,7 @@ function money_transfer_logs()
 //Add transfer money logs admin page
 function admin_money_transfer_logs()
 {
-    add_menu_page( 'Money transfer logs',
+    add_menu_page('Money transfer logs',
         'Transfer logs',
         'manage_options',
         'money-transfer-logs',
@@ -365,12 +365,12 @@ function admin_money_transfer_logs()
         8);
 }
 
-add_action( 'admin_menu', 'admin_money_transfer_logs' );
+add_action('admin_menu', 'admin_money_transfer_logs');
 
 function admin_money_transfer_cancellation()
 {
     if (!current_user_can('manage_options')) {
-        wp_die( __('You do not have sufficient permissions to access this page.') );
+        wp_die(__('You do not have sufficient permissions to access this page.'));
     }
 
     handle_admin_money_transfer_cancellation();
@@ -398,10 +398,11 @@ function handle_admin_money_transfer_cancellation()
         echo '<div class="updated"><p><strong>Money transfer cancelled successfully!</strong></p></div>';
     }
 }
+
 //Add money transfer logs report
 function admin_logs_report()
 {
-    add_menu_page( 'Report for money transfer logs',
+    add_menu_page('Report for money transfer logs',
         'Monthly reports',
         'manage_options',
         'logs-report',
@@ -410,7 +411,7 @@ function admin_logs_report()
         8);
 }
 
-add_action( 'admin_menu', 'admin_logs_report' );
+add_action('admin_menu', 'admin_logs_report');
 
 function admin_money_transfer_logs_report()
 {
@@ -440,19 +441,19 @@ function admin_money_transfer_logs_report()
                 GROUP BY company, `month`
             ) res
             GROUP BY company, `month`",
-            ARRAY_A);
+        ARRAY_A);
 
     $report_upd = [];
 
-    foreach ($report as  $k => $v) {
+    foreach ($report as $k => $v) {
         $report_upd[$k] = [
             'company' => $v['company'],
             'data' => [array_slice($v, -3, 3, true)]
         ];
 
         if (isset($report_upd[$k - 1]) && $report_upd[$k]['company'] == $report_upd[$k - 1]['company']) {
-            $report_upd[$k]['data'] = array_merge($report_upd[$k]['data'], $report_upd[$k-1]['data']);
-            unset($report_upd[$k-1]);
+            $report_upd[$k]['data'] = array_merge($report_upd[$k]['data'], $report_upd[$k - 1]['data']);
+            unset($report_upd[$k - 1]);
         }
     }
 

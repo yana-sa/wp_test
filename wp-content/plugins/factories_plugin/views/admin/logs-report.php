@@ -23,11 +23,11 @@ $report = admin_money_transfer_logs_report();
             <th>Nov</th>
             <th>Dec</th>
         </tr>
-            <?php foreach($report as $r) { ?>
+        <?php foreach ($report as $r) { ?>
             <tr>
                 <td><?php echo $r['company'];
-                    for($i=1; $i<=12; $i++) {?></td>
-                <td ><?php
+                    for ($i = 1; $i <= 12; $i++) { ?></td>
+                <td><?php
                     foreach ($r['data'] as $data) {
                         $profit = isset($data['profit']) ? $data['profit'] : '0';
                         $loss = isset($data['loss']) ? $data['loss'] : '0';
@@ -40,6 +40,6 @@ $report = admin_money_transfer_logs_report();
                     }
                     } ?></td>
             </tr>
-        <?php }?>
+        <?php } ?>
     </table>
 </div>
