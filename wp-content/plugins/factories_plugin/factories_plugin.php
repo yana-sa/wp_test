@@ -444,21 +444,17 @@ function admin_money_transfer_logs_report()
         ARRAY_A);
 
     $report_upd = [];
+    $companies = array_unique(array_column($report, 'company'));
 
-    foreach ($report as $k => $v) {
-        $report_upd[$k] = [
-            'company' => $v['company'],
-            'data' => [[
-                'profit' => $v['profit'],
-                'loss' => $v['loss'],
-                'month' => $v['month']
-            ]]
-        ];
+    foreach ($companies as $company) {
+        $report_upd[$company] = array_fill(1, 12, '');
+    }
 
-        if (isset($report_upd[$k - 1]) && $report_upd[$k]['company'] == $report_upd[$k - 1]['company']) {
-            $report_upd[$k]['data'] = array_merge($report_upd[$k]['data'], $report_upd[$k - 1]['data']);
-            unset($report_upd[$k - 1]);
-        }
+    foreach ($report as $row) {
+        $company = $row['company'];
+        $month = $row['month'];
+        $value = '+' . $row['profit'] . '$ / -' . $row['loss'] . '$';
+        $report_upd[$company][$month] = $value;
     }
 
     require_once 'views/admin/logs-report.php';
