@@ -576,20 +576,20 @@ add_action('edit_user_profile_update', 'save_user_balance_field');
 function company_investors_data($post)
 {
     global $wpdb;
-    $raw_data = $wpdb->get_results("SELECT user_id, `sum`, `date` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
-    $data = [];
+    $company_shares = $wpdb->get_results("SELECT user_id, `sum`, `date` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
+    $shares = [];
 
-    foreach ($raw_data as $share) {
+    foreach ($company_shares as $share) {
         $user = get_userdata($share['user_id']);
         $date = strtotime($share['date']);
-        $data[] = [
+        $shares[] = [
             'user' => $user->display_name,
             'sum' => $share['sum'],
             'date' => date("d.m.Y", $date)
         ];
     }
 
-    return $data;
+    return $shares;
 }
 
 //Deleting data on plugin deactivation
