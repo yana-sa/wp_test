@@ -6,7 +6,7 @@ $report = admin_money_transfer_logs_report();
     <h2 style="text-align: center;">Transfer report</h2>
 </header>
 
-<div class="tablediv">
+<div>
     <table style="text-align: center;">
         <tr>
             <th>2021</th>
@@ -23,19 +23,22 @@ $report = admin_money_transfer_logs_report();
             <th>Nov</th>
             <th>Dec</th>
         </tr>
-            <?php foreach($report as $data) { ?>
+            <?php foreach($report as $r) { ?>
             <tr>
-                <td><?php echo $data['company'];
+                <td><?php echo $r['company'];
                     for($i=1; $i<=12; $i++) {?></td>
                 <td ><?php
-                    $profit = isset($data['profit']) ? $data['profit'] : '0';
-                    $loss = isset($data['loss']) ? $data['loss'] : '0';
-                    if ($data['month'] == $i) {
-                        echo '+' . $profit . '$ / -' . $loss . '$';
-                        } else {
-                        echo '+0$ / -0$';
+                    foreach ($r['data'] as $data) {
+                        $profit = isset($data['profit']) ? $data['profit'] : '0';
+                        $loss = isset($data['loss']) ? $data['loss'] : '0';
+
+                        if ($data['month'] == $i) {
+                            $profit = isset($data['profit']) ? $data['profit'] : '0';
+                            $loss = isset($data['loss']) ? $data['loss'] : '0';
+                            echo '+' . $profit . '$ / -' . $loss . '$';
+                        }
                     }
-                } ?></td>
+                    } ?></td>
             </tr>
         <?php }?>
     </table>
