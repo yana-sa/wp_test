@@ -65,18 +65,15 @@ get_header();
             <tr>
                 <th>Investor</th>
                 <th>Shares</th>
-                <th>Date</th>
             </tr>
             <?php foreach ($shares as $share) { ?>
                 <tr>
                     <td><?php echo $share['user']?></td>
                     <td><?php echo $share['sum']?></td>
-                    <td><?php echo $share['date']?></td>
                 </tr>
             <?php } ?>
         </table>
         </div><!-- .entry-content -->
-
 
         <footer class="entry-footer default-max-width">
         </footer><!-- .entry-footer -->

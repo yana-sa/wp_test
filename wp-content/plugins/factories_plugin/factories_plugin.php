@@ -94,7 +94,7 @@ function create_company_shares_table()
 		  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 		  company_id BIGINT UNSIGNED NOT NULL,
 		  user_id BIGINT UNSIGNED NOT NULL,
-		  sum INT UNSIGNED NOT NULL,
+		  shares INT UNSIGNED NOT NULL,
           date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           UNIQUE KEY id (id),
 		  
@@ -110,6 +110,34 @@ function create_company_shares_table()
 }
 
 register_activation_hook(__FILE__, 'create_company_shares_table');
+
+function create_shares_exchange_table()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'shares_exchange';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            company_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            shares INT UNSIGNED NOT NULL,
+            price INT UNSIGNED NOT NULL,
+            date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY id (id),
+		  
+		FOREIGN KEY (company_id) REFERENCES wp_posts(ID)
+        ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES wp_users(ID)
+		ON DELETE CASCADE
+		) $charset_collate;
+		";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
+
+register_activation_hook(__FILE__, 'create_shares_exchange_table');
 
 function create_post_types_and_taxonomy()
 {
@@ -576,21 +604,84 @@ add_action('edit_user_profile_update', 'save_user_balance_field');
 function company_investors_data($post)
 {
     global $wpdb;
-    $company_shares = $wpdb->get_results("SELECT user_id, `sum`, `date` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
+    $company_shares = $wpdb->get_results("SELECT user_id, `sum` FROM `wp_company_shares`WHERE company_id = $post->ID;", ARRAY_A);
     $shares = [];
 
     foreach ($company_shares as $share) {
         $user = get_userdata($share['user_id']);
-        $date = strtotime($share['date']);
         $shares[] = [
             'user' => $user->display_name,
             'sum' => $share['sum'],
-            'date' => date("d.m.Y", $date)
         ];
     }
 
     return $shares;
 }
+
+//Shares exchange feature
+function shares_script_enqueue()
+{
+    wp_register_script('shares_exchange-js', get_stylesheet_directory_uri() . '/js/shares_exchange.js', ['jquery']);
+    wp_localize_script('shares_exchange-js', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
+
+    wp_enqueue_script('jquery-js');
+    wp_enqueue_script('shares_exchange-js');
+}
+
+add_action('init', 'shares_script_enqueue');
+
+function shares_exchange_offers_data()
+{
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $offers_details = $wpdb->get_results("SELECT id, company_id, user_id, shares, price FROM `wp_shares_exchange` WHERE user_id NOT IN ($user_id);", ARRAY_A);
+    $offers_table = [];
+
+    foreach ($offers_details as $offer) {
+        $user = get_userdata($offer['user_id']);
+        $offers_table[] = [
+            'offer_id' => $offer['id'],
+            'company' => get_the_title($offer['company_id']),
+            'user' => $user->display_name,
+            'shares' => $offer['shares'],
+            'price' => $offer['price']
+        ];
+    }
+
+    $user_shares = $wpdb->get_results("SELECT company_id, `sum` FROM `wp_company_shares` WHERE user_id = $user_id;", ARRAY_A);
+    $user_data = [];
+
+    foreach ($user_shares as $share) {
+        $user_data[] = [
+            'user_company' => get_the_title($share['company_id']),
+            'user_sum' => $share['sum'],
+            'user_balance' => get_user_meta($user_id, 'balance'),
+        ];
+    }
+
+    return [
+        'offers' => $offers_table,
+        'user_data' => $user_data
+    ];
+}
+
+function shares_exchange_offer()
+{
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'shares_exchange';
+
+    if (isset($_POST['company']) && isset($_POST['shares']) && isset($_POST['price'])) {
+        $company = $_POST['company'];
+        $user = get_current_user_id();
+        $shares = $_POST['shares'];
+        $price = $_POST['price'];
+
+        $wpdb->insert($table_name, ['company_id' => $company, 'user' => $user, 'shares' => $shares, 'price' => $price], ['%d']);
+        echo '<div class="updated"><p><strong>Shares exchange offer submitted successfully!</strong></p></div>';
+    }
+}
+
+add_action('wp_ajax_shares_exchange_offer', 'shares_exchange_offer');
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
