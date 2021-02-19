@@ -25,7 +25,7 @@ $shares_exchange_data = shares_exchange_offers_data();
                     <th>Seller</th>
                     <th>Shares</th>
                     <th>Price</th>
-                    <th>Purchase</th>
+                    <th>Action</th>
                 </tr>
                 <?php foreach ($shares_exchange_data['offers'] as $offer) { ?>
                 <tr>
@@ -33,7 +33,10 @@ $shares_exchange_data = shares_exchange_offers_data();
                     <td><?php echo $offer['user']; ?></td>
                     <td><?php echo $offer['shares']; ?></td>
                     <td><?php echo $offer['price']; ?>$</td>
-                    <td><input type="submit" data-offer="<?php echo $offer['offer_id']; ?>" value="Purchase!"></td>
+                    <td><?php if ($offer['is_owner'] == false) {?>
+                    <input type="submit" formmethod="post" data-submit="purchase" data-offer="<?php echo $offer['offer_id']; ?>" value="Purchase!"><?php
+                        } else { ?>
+                    <input type="submit" formmethod="post" data-submit="remove" data-offer="<?php echo $offer['offer_id']; ?>" value="Remove offer!"><?php } ?></td>
                 </tr>
                 <?php } ?>
             </table>

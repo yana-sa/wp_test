@@ -19,13 +19,33 @@ jQuery(document).ready(function () {
             type: "post",
             dataType: "json",
             url: myAjax.ajaxurl,
-            data: {action: "shares_exchange_offer",
+            data: {action:"shares_exchange_offer",
                 company_id:company_id,
                 shares:shares,
                 price:price},
             success: function (response) {
                 if (response.status === "success") {
                     alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    jQuery('[data-submit="remove"]').click(function (e) {
+        e.preventDefault();
+        var offer_id = jQuery(this).attr('data-offer')
+        var $this = jQuery(this)
+        jQuery.ajax({
+            type: "post",
+            dataType: "json",
+            url: myAjax.ajaxurl,
+            data: {action:"shares_exchange_remove", offer_id:offer_id},
+            success: function (response) {
+                if (response.status === "success") {
+                    alert(response.message);
+                    $this.closest('tr').remove();
                 } else {
                     alert(response.message);
                 }

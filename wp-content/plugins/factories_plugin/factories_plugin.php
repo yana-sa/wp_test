@@ -634,17 +634,23 @@ function shares_exchange_offers_data()
 {
     global $wpdb;
     $user_id = get_current_user_id();
-    $offers_details = $wpdb->get_results("SELECT id, company_id, user_id, shares, price FROM `wp_shares_exchange` WHERE user_id NOT IN ($user_id);", ARRAY_A);
+    $offers_details = $wpdb->get_results("SELECT id, company_id, user_id, shares, price FROM `wp_shares_exchange`;", ARRAY_A);
     $offers_table = [];
 
     foreach ($offers_details as $offer) {
+        if ($user_id == $offer['user_id']) {
+            $is_owner = true;
+        } else {
+            $is_owner = false;
+        }
         $user = get_userdata($offer['user_id']);
         $offers_table[] = [
             'offer_id' => $offer['id'],
             'company' => get_the_title($offer['company_id']),
             'user' => $user->display_name,
             'shares' => $offer['shares'],
-            'price' => $offer['price']
+            'price' => $offer['price'],
+            'is_owner' => $is_owner
         ];
     }
 
@@ -671,30 +677,53 @@ function shares_exchange_offer()
     global $wpdb;
     $offers_table = $wpdb->prefix . 'shares_exchange';
     $shares_table = $wpdb->prefix . 'company_shares';
-    $status = '';
+    $status = 'success';
     $message = '';
 
-    if (!isset($_POST['company_id']) || !isset($_POST['shares']) || !isset($_POST['price'])) {
+    $company_id = !empty($_POST['company_id']) ? $_POST['company_id'] : null;
+    $shares = !empty($_POST['shares']) ? $_POST['shares'] : null;
+    $price = !empty($_POST['price']) ? $_POST['price'] : null;
+
+    if (!$company_id || !$shares || !$price) {
         $status = 'error';
         $message = 'Something went wrong! Please fill in all the required fields.';
     } else {
-        $company_id = ($_POST['company_id']);
-        $shares = $_POST['shares'];
-        $price = $_POST['price'];
-
         $user_id = get_current_user_id();
         $user_share = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $user_id AND company_id = $company_id;");
-
         if ($shares > $user_share) {
             $status = 'error';
             $message = 'You own not enough shares to offer ' . $_POST['shares'];
         }
-
-        if (empty($status && $message)) {
+        if ($status == 'success') {
             $wpdb->insert($offers_table, ['company_id' => $company_id, 'user_id' => $user_id, 'shares' => $shares, 'price' => $price], ['%d']);
-            $status = 'success';
             $message = 'Shares exchange offer submitted successfully!';
         }
+    }
+    wp_send_json($response = [
+        'status' => $status,
+        'message' => $message
+    ]);
+}
+
+add_action('wp_ajax_shares_exchange_offer', 'shares_exchange_offer');
+
+function shares_exchange_remove()
+{
+    global $wpdb;
+    $offers_table = $wpdb->prefix . 'shares_exchange';
+    $status = '';
+    $message = '';
+
+    if (empty($_POST['offer_id'])) {
+        $status = 'error';
+        $message = 'Something went wrong!';
+    }
+
+    $offer_id = $_POST['offer_id'];
+    if (empty($status && $message)) {
+        $wpdb->delete($offers_table, ['id' => $offer_id], ['%d']);
+        $status = 'success';
+        $message = 'Shares exchange offer removed successfully!';
     }
 
     wp_send_json($response = [
@@ -703,7 +732,7 @@ function shares_exchange_offer()
     ]);
 }
 
-add_action('wp_ajax_shares_exchange_offer', 'shares_exchange_offer');
+add_action('wp_ajax_shares_exchange_remove', 'shares_exchange_remove');
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
