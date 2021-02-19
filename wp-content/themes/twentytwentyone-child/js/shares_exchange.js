@@ -15,7 +15,6 @@ jQuery(document).ready(function () {
         var company_id = jQuery(this).find('select[data-select="company_shares"]').val()
         var shares = jQuery(this).find('input[data-input="number_of_shares"]').val()
         var price = jQuery(this).find('input[data-input="price"]').val()
-        var $this = jQuery(this)
         jQuery.ajax({
             type: "post",
             dataType: "json",
