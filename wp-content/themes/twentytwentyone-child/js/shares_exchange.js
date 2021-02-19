@@ -10,17 +10,20 @@ jQuery(document).ready(function () {
     })
         .trigger( "change" );
 
-    jQuery('[data-form="exchange-offer"]').click(function (e) {
+    jQuery('[data-form="exchange-offer"]').submit(function (e) {
         e.preventDefault();
-        var company = jQuery(this).attr('data-select="company_shares"');
-        var shares = jQuery(this).attr('');
-        var price = jQuery(this).attr('');
+        var company_id = jQuery(this).find('select[data-select="company_shares"]').val()
+        var shares = jQuery(this).find('input[data-input="number_of_shares"]').val()
+        var price = jQuery(this).find('input[data-input="price"]').val()
         var $this = jQuery(this)
         jQuery.ajax({
             type: "post",
             dataType: "json",
             url: myAjax.ajaxurl,
-            data: {action: "shares_exchange_offer", company: company, shares: shares, price:price},
+            data: {action: "shares_exchange_offer",
+                company_id:company_id,
+                shares:shares,
+                price:price},
             success: function (response) {
                 if (response.status === "success") {
                     alert(response.message);

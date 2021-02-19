@@ -8,7 +8,6 @@ if (!is_user_logged_in()) {
     exit;
 }
 get_header();
-shares_exchange_offer();
 $shares_exchange_data = shares_exchange_offers_data();
 ?>
 
@@ -43,13 +42,13 @@ $shares_exchange_data = shares_exchange_offers_data();
                 <label for="company_shares">Company:</label><br>
                 <select name="company_shares" id="company_shares" data-select="company_shares"><?php
                     foreach ($shares_exchange_data['user_data'] as $user_shares) { ?>
-                    <option value="<?php echo $user_shares['user_company'] ?>" data-sum="<?php echo $user_shares['user_sum'] ?>"><?php echo $user_shares['your_company'] ?></option>
+                    <option data-selected="company" value="<?php echo $user_shares['user_company_id'] ?>" data-sum="<?php echo $user_shares['user_sum'] ?>"><?php echo $user_shares['user_company'] ?></option>
                     <?php } ?>
                 </select><br><div data-company="sum"></div>
                 <label for="shares">The number of shares to sell:</label><br>
                 <input type="number" data-input="number_of_shares" min="1" max="" id="shares" name="shares"><br>
                 <label for="price">Price:</label><br>
-                <input type="number" id="price" name="price">$<br><br>
+                <input type="number" data-input="price" id="price" name="price">$<br><br>
                 <input type="submit" value="Submit">
             </form>
         </div>

@@ -653,6 +653,7 @@ function shares_exchange_offers_data()
 
     foreach ($user_shares as $share) {
         $user_data[] = [
+            'user_company_id' => $share['company_id'],
             'user_company' => get_the_title($share['company_id']),
             'user_sum' => $share['sum'],
             'user_balance' => get_user_meta($user_id, 'balance'),
@@ -668,17 +669,38 @@ function shares_exchange_offers_data()
 function shares_exchange_offer()
 {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'shares_exchange';
+    $offers_table = $wpdb->prefix . 'shares_exchange';
+    $shares_table = $wpdb->prefix . 'company_shares';
+    $status = '';
+    $message = '';
 
-    if (isset($_POST['company']) && isset($_POST['shares']) && isset($_POST['price'])) {
-        $company = $_POST['company'];
-        $user = get_current_user_id();
+    if (!isset($_POST['company_id']) || !isset($_POST['shares']) || !isset($_POST['price'])) {
+        $status = 'error';
+        $message = 'Something went wrong! Please fill in all the required fields.';
+    } else {
+        $company_id = ($_POST['company_id']);
         $shares = $_POST['shares'];
         $price = $_POST['price'];
 
-        $wpdb->insert($table_name, ['company_id' => $company, 'user' => $user, 'shares' => $shares, 'price' => $price], ['%d']);
-        echo '<div class="updated"><p><strong>Shares exchange offer submitted successfully!</strong></p></div>';
+        $user_id = get_current_user_id();
+        $user_share = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $user_id AND company_id = $company_id;");
+
+        if ($shares > $user_share) {
+            $status = 'error';
+            $message = 'You own not enough shares to offer ' . $_POST['shares'];
+        }
+
+        if (empty($status && $message)) {
+            $wpdb->insert($offers_table, ['company_id' => $company_id, 'user_id' => $user_id, 'shares' => $shares, 'price' => $price], ['%d']);
+            $status = 'success';
+            $message = 'Shares exchange offer submitted successfully!';
+        }
     }
+
+    wp_send_json($response = [
+        'status' => $status,
+        'message' => $message
+    ]);
 }
 
 add_action('wp_ajax_shares_exchange_offer', 'shares_exchange_offer');
