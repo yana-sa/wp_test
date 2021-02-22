@@ -14,37 +14,48 @@ class SharesPurchase
     {
         $offers_table = $this->wpdb->prefix . 'shares_exchange';
         $shares_table = $this->wpdb->prefix . 'company_shares';
-        $status = 'success';
-        $message = '';
 
         $offer_id = !empty($_POST['offer_id']) ? $_POST['offer_id'] : null;
-        if (!$offer_id) {
-            $status = 'error';
-            $message = 'Something went wrong!';
-        }
-
         $buyer_id = get_current_user_id();
         $buyer_balance = get_user_meta($buyer_id, 'balance');
         $offered_price = $this->wpdb->get_var("SELECT price FROM $offers_table WHERE id = $offer_id;");
-        if ($buyer_balance < $offered_price) {
-            $status = 'error';
-            $message = 'You have insufficient balance for this purchase!';
-        }
 
-        if ($status == 'success') {
+        $response = $this->validate_purchase($offer_id, $buyer_balance, $offered_price);
+        if (empty($response)) {
             $seller_id = $this->wpdb->get_var("SELECT user_id FROM $offers_table WHERE id = $offer_id;");
             $offer_details = $this->wpdb->get_row("SELECT company_id, user_id, shares FROM $offers_table WHERE id = $offer_id;", ARRAY_A);
 
             $this->update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price);
             $this->update_shares($shares_table, $offer_details, $buyer_id);
             $this->wpdb->delete($offers_table, ['id' => $offer_id], ['%d']);
-            $message = 'Shares purchased successfully!';
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Shares purchased successfully!'
+            ];
         }
 
-        wp_send_json($response = [
-            'status' => $status,
-            'message' => $message
-        ]);
+        wp_send_json($response);
+    }
+
+    public function validate_purchase($offer_id, $buyer_balance, $offered_price)
+    {
+        $response = [];
+        if (!$offer_id) {
+            $response = [
+                'status' => 'error',
+                'message' => 'Something went wrong!'
+            ];
+        }
+
+        if ($buyer_balance[0] < $offered_price) {
+            $response = [
+                'status' => 'error',
+                'message' => 'You have insufficient balance for this purchase!'
+            ];
+        }
+
+        return $response;
     }
 
     public function update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price)
