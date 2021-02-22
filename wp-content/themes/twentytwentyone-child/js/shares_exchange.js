@@ -84,7 +84,6 @@ function getExchangeOffersData() {
         success: function (response) {
             var offer_data = '';
             jQuery.each(response, function (d, data) {
-                console.log(data);
                 offer_data += '<tr>';
                 offer_data += '<td>'+ data.Company +'</td>';
                 offer_data += '<td>'+ data.Seller +'</td>';
