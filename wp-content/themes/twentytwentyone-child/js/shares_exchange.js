@@ -82,7 +82,24 @@ function getExchangeOffersData() {
         url: myAjax.ajaxurl,
         data: {action: "get_exchange_offers_data"},
         success: function (response) {
-            jQuery('[data-table="exchange-offers"]').html(response)
+            var offer_data = '';
+            jQuery.each(response, function (d, data) {
+                console.log(data);
+                offer_data += '<tr>';
+                offer_data += '<td>'+ data.Company +'</td>';
+                offer_data += '<td>'+ data.Seller +'</td>';
+                offer_data += '<td>'+ data.Shares +'</td>';
+                offer_data += '<td>'+ data.Price +'</td>';
+
+                if(data.is_owner === false) {
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="purchase" data-offer="'+ data.Action +'" value="Purchase"></td>'
+                } else {
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="remove" data-offer="'+ data.Action +'" value="Remove offer"></td>'
+                }
+
+                jQuery('[data-table="exchange-offers"]').append(offer_data);
+            })
         }
     });
 }
+

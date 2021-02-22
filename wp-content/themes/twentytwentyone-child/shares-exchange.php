@@ -19,14 +19,17 @@ $shares_exchange_data = shares_exchange_offers_data();
         </header>
 
         <div class="tablediv">
-            <table data-table="exchange-offers">
-                <tr>
-                    <th>Company</th>
-                    <th>Seller</th>
-                    <th>Shares</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                </tr>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Seller</th>
+                        <th>Shares</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody data-table="exchange-offers">
                 <?php foreach ($shares_exchange_data['offers'] as $offer) { ?>
                 <tr>
                     <td><?php echo $offer['company']; ?></td>
@@ -39,6 +42,7 @@ $shares_exchange_data = shares_exchange_offers_data();
                     <input type="submit" formmethod="post" data-submit="remove" data-offer="<?php echo $offer['offer_id']; ?>" value="Remove offer"><?php } ?></td>
                 </tr>
                 <?php } ?>
+                </tbody>
             </table><br><br>
 
             <form class="offer-form" method="post" data-form="exchange-offer"><br>
