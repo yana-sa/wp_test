@@ -83,21 +83,22 @@ function getExchangeOffersData() {
         data: {action: "get_exchange_offers_data"},
         success: function (response) {
             var offer_data = '';
-            jQuery.each(response, function (d, data) {
+            for(var i = 0; i < response.length; i++) {
+                var data = response[i];
+                console.log(data);
                 offer_data += '<tr>';
-                offer_data += '<td>'+ data.Company +'</td>';
-                offer_data += '<td>'+ data.Seller +'</td>';
-                offer_data += '<td>'+ data.Shares +'</td>';
-                offer_data += '<td>'+ data.Price +'</td>';
-
+                offer_data += '<td>'+ data.company +'</td>';
+                offer_data += '<td>'+ data.seller +'</td>';
+                offer_data += '<td>'+ data.shares +'</td>';
+                offer_data += '<td>'+ data.price +'</td>';
                 if(data.is_owner === false) {
-                    offer_data += '<td><input type="submit" formmethod="post" data-submit="purchase" data-offer="'+ data.Action +'" value="Purchase"></td>'
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="purchase" data-offer="'+ data.action +'" value="Purchase"></td>'
                 } else {
-                    offer_data += '<td><input type="submit" formmethod="post" data-submit="remove" data-offer="'+ data.Action +'" value="Remove offer"></td>'
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="remove" data-offer="'+ data.action +'" value="Remove offer"></td>'
                 }
-
-                jQuery('[data-table="exchange-offers"]').append(offer_data);
-            })
+                offer_data += '</tr>';
+            }
+            jQuery('[data-table="exchange-offers"]').html(offer_data);
         }
     });
 }

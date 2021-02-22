@@ -724,11 +724,11 @@ function get_exchange_offers_data()
 
         $user = get_userdata($offer_data['user_id']);
         $offers_table[] = [
-            'Company' => get_the_title($offer_data['company_id']),
-            'Seller' => $user->display_name,
-            'Shares' => $offer_data['shares'],
-            'Price' => $offer_data['price'],
-            'Action' => $offer_data['id'],
+            'company' => get_the_title($offer_data['company_id']),
+            'seller' => $user->display_name,
+            'shares' => $offer_data['shares'],
+            'price' => $offer_data['price'],
+            'action' => $offer_data['id'],
             'is_owner' => $is_owner,
         ];
     }
@@ -738,44 +738,37 @@ function get_exchange_offers_data()
 
 add_action('wp_ajax_get_exchange_offers_data', 'get_exchange_offers_data');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 function shares_exchange_purchase()
 {
     global $wpdb;
     $offers_table = $wpdb->prefix . 'shares_exchange';
     $shares_table = $wpdb->prefix . 'company_shares';
-    $status = 'error';
-    $message = '';
 
+    $status = 'success';
+    $message = '';
     $offer_id = !empty($_POST['offer_id']) ? $_POST['offer_id'] : null;
+
     if (!$offer_id) {
+        $status = 'error';
         $message = 'Something went wrong!';
     }
 
     $buyer_id = get_current_user_id();
     $buyer_balance = get_user_meta($buyer_id, 'balance');
     $offered_price = $wpdb->get_var("SELECT price FROM $offers_table WHERE id = $offer_id;");
+
     if ($buyer_balance < $offered_price) {
+        $status = 'error';
         $message = 'You have insufficient balance for this purchase!';
     }
 
-    if (empty($message)) {
+    if ($status == 'success') {
         $seller_id = $wpdb->get_var("SELECT user_id FROM $offers_table WHERE id = $offer_id;");
-        $seller_balance = get_user_meta($seller_id, 'balance');
-
-        $upd_seller_balance = $seller_balance[0] + $offered_price;
-        $upd_buyer_balance = $buyer_balance[0] - $offered_price;
-        update_user_meta($seller_id, 'balance', $upd_seller_balance);
-        update_user_meta($buyer_id, 'balance', $upd_buyer_balance);
-
         $offer_details = $wpdb->get_row("SELECT company_id, user_id, shares FROM $offers_table WHERE id = $offer_id;", ARRAY_A);
-        purchase_update_shares($wpdb, $shares_table, $offer_details, $buyer_id);
-        $wpdb->delete($offers_table, ['id' => $offer_id], ['%d']);
 
-        $status = 'success';
+        update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price);
+        update_shares($wpdb, $shares_table, $offer_details, $buyer_id);
+        $wpdb->delete($offers_table, ['id' => $offer_id], ['%d']);
         $message = 'Shares purchased successfully!';
     }
 
@@ -785,7 +778,17 @@ function shares_exchange_purchase()
     ]);
 }
 
-function purchase_update_shares($wpdb, $shares_table, $offer_details, $buyer_id)
+function update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price)
+{
+    $seller_balance = get_user_meta($seller_id, 'balance');
+    $upd_seller_balance = $seller_balance[0] + $offered_price;
+    $upd_buyer_balance = $buyer_balance[0] - $offered_price;
+
+    update_user_meta($seller_id, 'balance', $upd_seller_balance);
+    update_user_meta($buyer_id, 'balance', $upd_buyer_balance);
+}
+
+function update_shares($wpdb, $shares_table, $offer_details, $buyer_id)
 {
     $company_id = $offer_details['company_id'];
     $seller_id = $offer_details['user_id'];
