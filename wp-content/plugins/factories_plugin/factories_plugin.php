@@ -728,7 +728,7 @@ function get_exchange_offers_data()
             'seller' => $user->display_name,
             'shares' => $offer_data['shares'],
             'price' => $offer_data['price'],
-            'action' => $offer_data['id'],
+            'offer_id' => $offer_data['id'],
             'is_owner' => $is_owner,
         ];
     }
@@ -743,11 +743,10 @@ function shares_exchange_purchase()
     global $wpdb;
     $offers_table = $wpdb->prefix . 'shares_exchange';
     $shares_table = $wpdb->prefix . 'company_shares';
-
     $status = 'success';
     $message = '';
-    $offer_id = !empty($_POST['offer_id']) ? $_POST['offer_id'] : null;
 
+    $offer_id = !empty($_POST['offer_id']) ? $_POST['offer_id'] : null;
     if (!$offer_id) {
         $status = 'error';
         $message = 'Something went wrong!';
@@ -756,7 +755,6 @@ function shares_exchange_purchase()
     $buyer_id = get_current_user_id();
     $buyer_balance = get_user_meta($buyer_id, 'balance');
     $offered_price = $wpdb->get_var("SELECT price FROM $offers_table WHERE id = $offer_id;");
-
     if ($buyer_balance < $offered_price) {
         $status = 'error';
         $message = 'You have insufficient balance for this purchase!';
@@ -796,7 +794,6 @@ function update_shares($wpdb, $shares_table, $offer_details, $buyer_id)
 
     $buyer_shares = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $buyer_id AND company_id = $company_id;");
     $upd_buyer_shares = $buyer_shares + $offered_shares;
-
     if (!$buyer_shares) {
         $wpdb->insert($shares_table, ['company_id' => $company_id, 'user_id' => $buyer_id, 'sum' => $offered_shares], ['%d']);
     } else {
@@ -805,11 +802,10 @@ function update_shares($wpdb, $shares_table, $offer_details, $buyer_id)
 
     $seller_shares = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $seller_id AND company_id = $company_id;");
     $upd_seller_shares = $seller_shares - $offered_shares;
-    $wpdb->update($shares_table, ['sum' => $upd_seller_shares], ['sum' => $seller_shares, 'user_id' => $seller_id, 'company_id' => $company_id], ['%d'], ['%d']);
-
-    $current_shares = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $seller_id AND company_id = $company_id;");
-    if ($current_shares == 0) {
+    if ($upd_seller_shares == 0) {
         $wpdb->delete($shares_table, ['user_id' => $seller_id, 'company_id' => $company_id], ['%d']);
+    } else {
+        $wpdb->update($shares_table, ['sum' => $upd_seller_shares], ['sum' => $seller_shares, 'user_id' => $seller_id, 'company_id' => $company_id], ['%d'], ['%d']);
     }
 }
 

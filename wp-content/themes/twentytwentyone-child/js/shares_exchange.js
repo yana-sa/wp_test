@@ -85,16 +85,15 @@ function getExchangeOffersData() {
             var offer_data = '';
             for(var i = 0; i < response.length; i++) {
                 var data = response[i];
-                console.log(data);
                 offer_data += '<tr>';
                 offer_data += '<td>'+ data.company +'</td>';
                 offer_data += '<td>'+ data.seller +'</td>';
                 offer_data += '<td>'+ data.shares +'</td>';
                 offer_data += '<td>'+ data.price +'</td>';
                 if(data.is_owner === false) {
-                    offer_data += '<td><input type="submit" formmethod="post" data-submit="purchase" data-offer="'+ data.action +'" value="Purchase"></td>'
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="purchase" data-offer="'+ data.offer_id +'" value="Purchase"></td>'
                 } else {
-                    offer_data += '<td><input type="submit" formmethod="post" data-submit="remove" data-offer="'+ data.action +'" value="Remove offer"></td>'
+                    offer_data += '<td><input type="submit" formmethod="post" data-submit="remove" data-offer="'+ data.offer_id +'" value="Remove offer"></td>'
                 }
                 offer_data += '</tr>';
             }
