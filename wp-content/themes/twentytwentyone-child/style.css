@@ -35,5 +35,10 @@ table {
     background-color: white;
     border: solid;
     text-align: center;
-    width: 79%;
+    width: 100%;
+}
+
+.offer-form {
+    text-align: center;
+    background-color: #9591a58c;
 }

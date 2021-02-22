@@ -26,6 +26,27 @@ jQuery(document).ready(function () {
             success: function (response) {
                 if (response.status === "success") {
                     alert(response.message);
+                    getExchangeOffersData();
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    jQuery('[data-submit="purchase"]').click(function (e) {
+        e.preventDefault();
+        var offer_id = jQuery(this).attr('data-offer')
+        var $this = jQuery(this)
+        jQuery.ajax({
+            type: "post",
+            dataType: "json",
+            url: myAjax.ajaxurl,
+            data: {action:"shares_exchange_purchase", offer_id:offer_id},
+            success: function (response) {
+                if (response.status === "success") {
+                    alert(response.message);
+                    $this.closest('tr').remove();
                 } else {
                     alert(response.message);
                 }
@@ -53,3 +74,15 @@ jQuery(document).ready(function () {
         });
     });
 });
+
+function getExchangeOffersData() {
+    jQuery.ajax({
+        type: "post",
+        dataType: "json",
+        url: myAjax.ajaxurl,
+        data: {action: "get_exchange_offers_data"},
+        success: function (response) {
+            jQuery('[data-table="exchange-offers"]').html(response)
+        }
+    });
+}
