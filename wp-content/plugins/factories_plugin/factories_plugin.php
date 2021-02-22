@@ -7,6 +7,8 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
+require_once 'SharesPurchase.php';
+global $wpdb;
 
 //Seeding data on plugin activation
 function insert_factory()
@@ -738,79 +740,6 @@ function get_exchange_offers_data()
 
 add_action('wp_ajax_get_exchange_offers_data', 'get_exchange_offers_data');
 
-function shares_exchange_purchase()
-{
-    global $wpdb;
-    $offers_table = $wpdb->prefix . 'shares_exchange';
-    $shares_table = $wpdb->prefix . 'company_shares';
-    $status = 'success';
-    $message = '';
-
-    $offer_id = !empty($_POST['offer_id']) ? $_POST['offer_id'] : null;
-    if (!$offer_id) {
-        $status = 'error';
-        $message = 'Something went wrong!';
-    }
-
-    $buyer_id = get_current_user_id();
-    $buyer_balance = get_user_meta($buyer_id, 'balance');
-    $offered_price = $wpdb->get_var("SELECT price FROM $offers_table WHERE id = $offer_id;");
-    if ($buyer_balance < $offered_price) {
-        $status = 'error';
-        $message = 'You have insufficient balance for this purchase!';
-    }
-
-    if ($status == 'success') {
-        $seller_id = $wpdb->get_var("SELECT user_id FROM $offers_table WHERE id = $offer_id;");
-        $offer_details = $wpdb->get_row("SELECT company_id, user_id, shares FROM $offers_table WHERE id = $offer_id;", ARRAY_A);
-
-        update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price);
-        update_shares($wpdb, $shares_table, $offer_details, $buyer_id);
-        $wpdb->delete($offers_table, ['id' => $offer_id], ['%d']);
-        $message = 'Shares purchased successfully!';
-    }
-
-    wp_send_json($response = [
-        'status' => $status,
-        'message' => $message
-    ]);
-}
-
-function update_balances($seller_id, $buyer_id, $buyer_balance, $offered_price)
-{
-    $seller_balance = get_user_meta($seller_id, 'balance');
-    $upd_seller_balance = $seller_balance[0] + $offered_price;
-    $upd_buyer_balance = $buyer_balance[0] - $offered_price;
-
-    update_user_meta($seller_id, 'balance', $upd_seller_balance);
-    update_user_meta($buyer_id, 'balance', $upd_buyer_balance);
-}
-
-function update_shares($wpdb, $shares_table, $offer_details, $buyer_id)
-{
-    $company_id = $offer_details['company_id'];
-    $seller_id = $offer_details['user_id'];
-    $offered_shares = $offer_details['shares'];
-
-    $buyer_shares = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $buyer_id AND company_id = $company_id;");
-    $upd_buyer_shares = $buyer_shares + $offered_shares;
-    if (!$buyer_shares) {
-        $wpdb->insert($shares_table, ['company_id' => $company_id, 'user_id' => $buyer_id, 'sum' => $offered_shares], ['%d']);
-    } else {
-        $wpdb->update($shares_table, ['sum' => $upd_buyer_shares], ['sum' => $buyer_shares, 'user_id' => $buyer_id, 'company_id' => $company_id], ['%d'], ['%d']);
-    }
-
-    $seller_shares = $wpdb->get_var("SELECT `sum` FROM $shares_table WHERE user_id = $seller_id AND company_id = $company_id;");
-    $upd_seller_shares = $seller_shares - $offered_shares;
-    if ($upd_seller_shares == 0) {
-        $wpdb->delete($shares_table, ['user_id' => $seller_id, 'company_id' => $company_id], ['%d']);
-    } else {
-        $wpdb->update($shares_table, ['sum' => $upd_seller_shares], ['sum' => $seller_shares, 'user_id' => $seller_id, 'company_id' => $company_id], ['%d'], ['%d']);
-    }
-}
-
-add_action('wp_ajax_shares_exchange_purchase', 'shares_exchange_purchase');
-
 function shares_exchange_remove()
 {
     global $wpdb;
@@ -836,6 +765,7 @@ function shares_exchange_remove()
 }
 
 add_action('wp_ajax_shares_exchange_remove', 'shares_exchange_remove');
+add_action('wp_ajax_shares_exchange_purchase', [new SharesPurchase($wpdb), 'shares_exchange_purchase']);
 
 //Deleting data on plugin deactivation
 function factories_plugin_deactivate()
