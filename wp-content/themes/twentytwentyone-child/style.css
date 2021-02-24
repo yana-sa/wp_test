@@ -42,3 +42,14 @@ table {
     text-align: center;
     background-color: #9591a58c;
 }
+
+.forum-list {
+    background-color: #dbd5f4;
+    list-style-position: inside;
+    padding-block: 30px;
+}
+
+.forum-list-item {
+    color: #515164;
+    padding: 15px;
+}

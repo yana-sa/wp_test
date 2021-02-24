@@ -158,6 +158,7 @@ function create_post_types_and_taxonomy()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
+            'menu_icon' => 'dashicons-building',
             'taxonomies' => ['companies'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
@@ -179,6 +180,7 @@ function create_post_types_and_taxonomy()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
+            'menu_icon' => 'dashicons-building',
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
             'register_meta_box_cb' => 'balance_box',]
@@ -294,8 +296,8 @@ function monthly_profit_content($post)
 
 function monthly_profit_box_save($post_id)
 {
-    $profit = $_POST['monthly_profit'];
-    if (!isset($profit)) {
+    $profit = ($_POST['monthly_profit']) ? $_POST['monthly_profit'] : null;
+    if (!$profit) {
         $profit = 0;
     }
     update_post_meta($post_id, '_monthly_profit', $profit);
@@ -325,8 +327,8 @@ function balance_box_content($post)
 
 function balance_box_save($post_id)
 {
-    $balance = $_POST['balance'];
-    if (!isset($balance)) {
+    $balance = ($_POST['balance']) ? $_POST['balance'] : null;
+    if (!$balance) {
         $balance = 0;
     }
 

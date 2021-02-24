@@ -89,6 +89,7 @@ function create_books_post_type()
             'capability_type' => 'post',
             'show_in_rest' => true,
             'show_in_menu' => true,
+            'menu_icon' => 'dashicons-book-alt',
             'taxonomies' => ['book_category'],
             'supports' => ['title', 'editor', 'custom-fields'],
             'menu_position' => 5,
