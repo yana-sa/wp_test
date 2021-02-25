@@ -30,20 +30,7 @@ get_header();
                 </li>
             <?php } ?>
         </ul>
-        <form method="post" action="/?page_id=6230">
-            <h4><input type="submit" value="Add new topic!">
-                <input type="hidden" name="forum_id" value="<?php echo $post->ID ?>">
-        </form>
-      <?php
-        wp_link_pages(
-            array(
-                'before'   => '<nav class="page-links" aria-label="' . esc_attr__( 'Page', 'twentytwentyone-child' ) . '">',
-                'after'    => '</nav>',
-                /* translators: %: page number. */
-                'pagelink' => esc_html__( 'Page %', 'twentytwentyone-child' ),
-            )
-        );
-        ?>
+        <h4><a href="/add-new-topic/forum_id=<?php echo $post->ID ?>" class="add-topic">Add new topic!</a>
     </div><!-- .entry-content -->
 
     <footer class="entry-footer default-max-width">

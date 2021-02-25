@@ -53,3 +53,10 @@ table {
     color: #515164;
     padding: 15px;
 }
+
+.add-topic {
+    background-color: #515164;
+    color: white;
+    padding: 20px 20px;
+    text-decoration: none;
+}

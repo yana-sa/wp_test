@@ -4,7 +4,7 @@
  *
  */
 get_header();
-$forum_id = $_POST['forum_id'];
+$forum_id = $_GET['forum_id'];
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -16,7 +16,7 @@ $forum_id = $_POST['forum_id'];
 
     <div class="entry-content">
           <form method="post">
-              <h4>Add new topic to the forum "<?php echo get_the_title($forum_id) ?>"</h4>
+              <h4>Add new topic to the forum</h4>
               <h5>Title:
               <label for="title">
                   <input type="text" name="title" id="title">
@@ -25,6 +25,7 @@ $forum_id = $_POST['forum_id'];
               <label for="desc">
                   <input type="text" name="desc" id="desc">
               </label><br>
+                  <input type="hidden" name="forum_id" id="desc">
                   <input type="submit" onclick="window.location.href = <?php echo $_SERVER['HTTP_REFERER']; ?>" value="Add!">
           </form>
     </div><!-- .entry-content -->
