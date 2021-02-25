@@ -22,14 +22,15 @@ $forum_id = $_GET['forum_id'];
               <label for="title">
                   <input type="text" name="title" id="title">
               </label><br><br>
-
                   <input type="hidden" name="forum_id" id="forum_id" value="<?php echo $forum_id ?>">
                   <input type="submit" value="Add!">
           </form>
     </div><!-- .entry-content -->
 
     <footer class="entry-footer default-max-width">
-        <?php twenty_twenty_one_entry_meta_footer(); ?>
+        <?php
+        handle_add_new_topic();
+        twenty_twenty_one_entry_meta_footer(); ?>
     </footer><!-- .entry-footer -->
 
     <?php if ( ! is_singular( 'attachment' ) ) : ?>
