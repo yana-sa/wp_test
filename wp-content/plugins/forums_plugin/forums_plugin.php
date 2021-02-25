@@ -60,22 +60,20 @@ function create_post_types()
         ]
     );
 
-    register_post_type('topic', [
-            'labels' => [
-                'name' => 'Topics',
-                'singular_name' => 'Topic',
-                'add_new' => 'Add Topic',
-                'all_items' => 'All Topic',
-                'edit_item' => 'Edit Topic',
-                'view_item' => 'View Topic'
-            ],
+    register_post_type('topic',
+        [
+            'hierarchical' => true,
             'public' => true,
             'has_archive' => true,
-            'rewrite' => ['slug' => 'topic'],
+            'rewrite' => ['slug' => 'topic',
+                'with_front' => false],
             'capability_type' => 'post',
             'show_in_rest' => false,
             'show_in_menu' => false,
-            'supports' => ['title', 'editor', 'custom-fields'],
+            'supports' => ['page-attributes',
+                'title',
+                'editor',
+                'custom-fields'],
         ]
     );
 
@@ -132,6 +130,52 @@ function forum_order_box_save($post_id)
 
 add_action('save_post', 'forum_order_box_save');
 
+function forum_topic_box()
+{
+    add_meta_box(
+        'topic',
+        __('Topics', 'sitepoint'),
+        'forum_topic_box_content',
+        'forum',
+        'side'
+    );
+}
+
+add_action('add_meta_boxes_forum', 'forum_topic_box');
+
+function forum_topic_box_content($post)
+{
+    $topics = get_children([
+        'post_parent' => $post->ID,
+        'post_type'   => 'topic',
+    ]);
+
+    if ($topics) {
+        foreach($topics as $topic) {
+            echo "<li>" . $topic->post_title . "</li>";
+        }
+    }
+
+    echo "<input type='text' style='width:95%' id='topic' name='topic'>";
+}
+
+function forum_topic_box_save($post_id)
+{
+    if ($_POST['topic'] || get_post_type($post_id) == 'forum') {
+        $topic_data = [
+            'post_type' => 'topic',
+            'post_name' => 'topic',
+            'post_title' => $_POST['topic'],
+            'post_parent' => $post_id,
+            'post_status' => 'publish',
+        ];
+
+        update_post_meta($post_id, '_topic', $_POST['topic']);
+        wp_insert_post($topic_data);
+    }
+}
+add_action('post_updated', 'forum_topic_box_save');
+
 function forum_list_data()
 {
     $forums = [];
@@ -151,3 +195,21 @@ function forum_list_data()
 
     return $forums;
 }
+
+function forums_plugin_deactivate()
+{
+    $query = new WP_Query([
+        'post_type' => 'forum',
+        'post_status' => 'publish'
+    ]);
+
+    while ($query->have_posts()) {
+        $query->the_post();
+        $post_id = get_the_ID();
+        wp_delete_post($post_id, true);
+    }
+
+    do_action('forums_plugin_deactivate');
+}
+
+register_deactivation_hook(__FILE__, 'forums_plugin_deactivate');
