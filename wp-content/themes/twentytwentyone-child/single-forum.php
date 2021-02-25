@@ -4,9 +4,10 @@
  *
  */
 global $post;
-$topics = get_children([
-    'post_parent' => $post->ID,
-    'post_type'   => 'topic',
+$query = new WP_Query([
+    'post_type' => 'topic',
+    'meta_key' => '_forum_id',
+    'meta_value' => $post->ID
 ]);
 
 get_header();
@@ -22,13 +23,12 @@ get_header();
     <div class="entry-content">
         <ul class='forum-list'>
         <?php
-        if ($topics) {
-            foreach($topics as $topic) { ?>
+        while ($query->have_posts()) {
+            $query->the_post(); ?>
                 <h4><li class='forum-list-item'>
-                    <a href="<?php echo $topic->guid ?>"><?php echo $topic->post_title ?></a>
+                    <a href="<?php echo get_the_permalink() ?>"><?php echo get_the_title() ?></a>
                 </li>
-            <?php }
-        } ?>
+            <?php } ?>
         </ul>
         <form method="post" action="/?page_id=6230">
             <h4><input type="submit" value="Add new topic!">
