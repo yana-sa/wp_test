@@ -17,16 +17,14 @@ $forum_id = $_GET['forum_id'];
     <div class="entry-content">
           <form method="post">
               <h4>Add new topic to the forum</h4>
+
               <h5>Title:
               <label for="title">
                   <input type="text" name="title" id="title">
-              </label><br>
-              Description:
-              <label for="desc">
-                  <input type="text" name="desc" id="desc">
-              </label><br>
-                  <input type="hidden" name="forum_id" id="desc">
-                  <input type="submit" onclick="window.location.href = <?php echo $_SERVER['HTTP_REFERER']; ?>" value="Add!">
+              </label><br><br>
+
+                  <input type="hidden" name="forum_id" id="forum_id" value="<?php echo $forum_id ?>">
+                  <input type="submit" value="Add!">
           </form>
     </div><!-- .entry-content -->
 
