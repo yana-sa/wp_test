@@ -7,7 +7,6 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
-handle_add_new_topic();
 
 function insert_forum()
 {
@@ -218,6 +217,7 @@ function handle_add_new_topic()
             'post_name' => 'topic',
             'post_title' => $topic,
             'post_status' => 'publish',
+            'post_author' => 1,
         ];
 
         $topic_id = wp_insert_post($topic_data);
@@ -228,16 +228,19 @@ function handle_add_new_topic()
             'post_name' => 'topic_post',
             'post_title' => $topic,
             'post_content' => $content,
+            'post_author' => get_current_user_id(),
             'post_status' => 'publish',
         ];
 
         $topic_post_id = wp_insert_post($topic_post_data);
         update_post_meta($topic_post_id, '_topic_id', $topic_id);
 
-        $link = get_post_permalink($topic_id);
-        wp_redirect($link);
+        wp_redirect(get_post_permalink($topic_id));
+        exit;
     }
 }
+
+add_action('wp_loaded', 'handle_add_new_topic');
 
 function forums_plugin_deactivate()
 {
