@@ -27,7 +27,7 @@ $forum_id = $_GET['forum_id'];
                       <textarea name="content" id="content"></textarea>
                   </label><br><br>
                   <input type="hidden" name="forum_id" id="forum_id" value="<?php echo $forum_id ?>">
-                  <input type="submit" value="Add!">
+                  <input type="submit" data-submit="new-topic" value="Add!">
           </form>
     </div><!-- .entry-content -->
 

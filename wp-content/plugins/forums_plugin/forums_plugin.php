@@ -209,6 +209,7 @@ function handle_add_new_topic()
     $topic = ($_POST['title']) ? $_POST['title'] : null;
     $forum_id = ($_POST['forum_id']) ? $_POST['forum_id'] : null;
     $content = ($_POST['content']) ? $_POST['content'] : null;
+
     if (isset($topic) || isset($forum_id) || isset($content)) {
         $topic_data = [
             'post_type' => 'topic',
