@@ -235,7 +235,7 @@ function handle_add_new_topic()
         update_post_meta($topic_post_id, '_topic_id', $topic_id);
 
         $link = get_post_permalink($topic_id);
-        wp_redirect(get_post_permalink($link));
+        wp_redirect($link);
     }
 }
 
