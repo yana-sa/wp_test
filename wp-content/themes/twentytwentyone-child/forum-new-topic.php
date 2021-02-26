@@ -16,12 +16,16 @@ $forum_id = $_GET['forum_id'];
 
     <div class="entry-content">
           <form method="post">
-              <h4>Add new topic to the forum</h4>
+              <h4>Add new topic to the forum</h4><br>
 
-              <h5>Title:
-              <label for="title">
+              <h5>Title:<br>
+                <label for="title">
                   <input type="text" name="title" id="title">
-              </label><br><br>
+                </label><br>
+              <h5>Content:
+                  <label for="content">
+                      <textarea name="content" id="content"></textarea>
+                  </label><br><br>
                   <input type="hidden" name="forum_id" id="forum_id" value="<?php echo $forum_id ?>">
                   <input type="submit" value="Add!">
           </form>

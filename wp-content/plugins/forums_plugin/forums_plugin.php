@@ -157,6 +157,33 @@ function topic_forum_id_box_content($post)
     }
 }
 
+function topic_post_topic_id_box()
+{
+    add_meta_box(
+        'topic_id',
+        __('Topic ID', 'sitepoint'),
+        'topic_post_topic_id_box_content',
+        'topic_post',
+        'side'
+    );
+}
+
+add_action('add_meta_boxes_forum', 'topic_post_topic_id_box');
+
+function topic_post_topic_id_box_content($post)
+{
+    $query = new WP_Query([
+        'post_type' => 'topic_post',
+        'meta_key' => '_topic_id',
+        'meta_value' => $post->ID
+    ]);
+
+    while ($query->have_posts()) {
+        $query->the_post();
+        echo "<li>" . get_the_title() . "</li>";
+    }
+}
+
 function forum_list_data()
 {
     $forums = [];
@@ -181,7 +208,8 @@ function handle_add_new_topic()
 {
     $topic = ($_POST['title']) ? $_POST['title'] : null;
     $forum_id = ($_POST['forum_id']) ? $_POST['forum_id'] : null;
-    if (isset($topic) || isset($forum_id)) {
+    $content = ($_POST['content']) ? $_POST['content'] : null;
+    if (isset($topic) || isset($forum_id) || isset($content)) {
         $topic_data = [
             'post_type' => 'topic',
             'post_name' => 'topic',
@@ -191,6 +219,17 @@ function handle_add_new_topic()
 
         $topic_id = wp_insert_post($topic_data);
         update_post_meta($topic_id, '_forum_id', $forum_id);
+
+        $topic_post_data = [
+            'post_type' => 'topic_post',
+            'post_name' => 'topic_post',
+            'post_title' => $topic,
+            'post_content' => $content,
+            'post_status' => 'publish',
+        ];
+
+        $topic_post_id = wp_insert_post($topic_post_data);
+        update_post_meta($topic_post_id, '_topic_id', $topic_id);
     }
 }
 
