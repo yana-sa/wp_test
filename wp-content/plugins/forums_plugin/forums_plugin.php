@@ -120,11 +120,7 @@ function forum_order_box_content($post)
 
 function forum_order_box_save($post_id)
 {
-    $order = !empty($_POST['order']) ? $_POST['order'] : null;
-    if (!$order) {
-        $order = 0;
-    }
-
+    $order = !empty($_POST['order']) ? $_POST['order'] : 0;
     update_post_meta($post_id, '_order', $order);
 }
 
