@@ -296,10 +296,11 @@ function monthly_profit_content($post)
 
 function monthly_profit_box_save($post_id)
 {
-    $profit = ($_POST['monthly_profit']) ? $_POST['monthly_profit'] : null;
+    $profit = !empty($_POST['monthly_profit']) ? $_POST['monthly_profit'] : null;
     if (!$profit) {
         $profit = 0;
     }
+
     update_post_meta($post_id, '_monthly_profit', $profit);
 }
 
@@ -327,7 +328,7 @@ function balance_box_content($post)
 
 function balance_box_save($post_id)
 {
-    $balance = ($_POST['balance']) ? $_POST['balance'] : null;
+    $balance = !empty($_POST['balance']) ? $_POST['balance'] : null;
     if (!$balance) {
         $balance = 0;
     }

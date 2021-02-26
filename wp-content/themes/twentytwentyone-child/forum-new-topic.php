@@ -3,8 +3,10 @@
  * Template Name: Add new topic Page
  *
  */
+
 get_header();
-$forum_id = $_GET['forum_id'];
+if (isset($_GET['forum_id'])) {
+    $forum_id = $_GET['forum_id']
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
@@ -32,8 +34,7 @@ $forum_id = $_GET['forum_id'];
     </div><!-- .entry-content -->
 
     <footer class="entry-footer default-max-width">
-        <?php
-        handle_add_new_topic();
+        <?php handle_add_new_topic();
         twenty_twenty_one_entry_meta_footer(); ?>
     </footer><!-- .entry-footer -->
 
@@ -42,3 +43,10 @@ $forum_id = $_GET['forum_id'];
     <?php endif; ?>
 
 </article><!-- #post-${ID} -->
+<?php } else { ?>
+    <div class="error">
+        <header class="entry-header alignwide">
+            <h1>The page is not found!
+        </header>
+    </div>
+<?php }

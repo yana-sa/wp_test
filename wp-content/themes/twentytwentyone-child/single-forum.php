@@ -9,6 +9,7 @@ $query = new WP_Query([
     'meta_key' => '_forum_id',
     'meta_value' => $post->ID,
 ]);
+
 get_header();
 ?>
 

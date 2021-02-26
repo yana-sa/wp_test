@@ -7,6 +7,7 @@ Author: Unknown Yana
 Author URI: http://localhost:8000
 Version: 1.0.0
 */
+handle_add_new_topic();
 
 function insert_forum()
 {
@@ -120,9 +121,10 @@ function forum_order_box_content($post)
 
 function forum_order_box_save($post_id)
 {
-    $order = ($_POST['order']) ? $_POST['order'] : null;
-    if (!$order) {
+    if (!isset($_POST['order'])) {
         $order = 0;
+    } else {
+        $order = $_POST['order'];
     }
 
     update_post_meta($post_id, '_order', $order);
@@ -190,7 +192,7 @@ function forum_list_data()
     $query = new WP_Query([
         'post_type' => 'forum',
         'meta_key' => '_order',
-        'orderby'  => [ 'meta_value_num' => 'ASC' ],
+        'orderby' => ['meta_value_num' => 'ASC'],
     ]);
 
     while ($query->have_posts()) {
@@ -206,11 +208,11 @@ function forum_list_data()
 
 function handle_add_new_topic()
 {
-    $topic = ($_POST['title']) ? $_POST['title'] : null;
-    $forum_id = ($_POST['forum_id']) ? $_POST['forum_id'] : null;
-    $content = ($_POST['content']) ? $_POST['content'] : null;
+    $topic = !empty($_POST['title']) ? $_POST['title'] : null;
+    $forum_id = !empty($_POST['forum_id']) ? $_POST['forum_id'] : null;
+    $content = !empty($_POST['content']) ? $_POST['content'] : null;
 
-    if (isset($topic) || isset($forum_id) || isset($content)) {
+    if ($topic || $forum_id || $content) {
         $topic_data = [
             'post_type' => 'topic',
             'post_name' => 'topic',
@@ -231,6 +233,9 @@ function handle_add_new_topic()
 
         $topic_post_id = wp_insert_post($topic_post_data);
         update_post_meta($topic_post_id, '_topic_id', $topic_id);
+
+        $link = get_post_permalink($topic_id);
+        wp_redirect(get_post_permalink($link));
     }
 }
 
