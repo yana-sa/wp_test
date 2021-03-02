@@ -237,6 +237,26 @@ function handle_add_new_topic()
 
 add_action('wp_loaded', 'handle_add_new_topic');
 
+function handle_add_new_topic_post()
+{
+    $post_title = !empty($_POST['post_title']) ? $_POST['post_title'] : null;
+    $post_content = !empty($_POST['post_content']) ? $_POST['post_content'] : null;
+    $topic_id = !empty($_POST['topic_id']) ? $_POST['topic_id'] : null;
+
+    if ($post_title || $topic_id || $post_content) {
+        $topic_post_data = [
+            'post_type' => 'topic_post',
+            'post_name' => 'topic_post',
+            'post_title' => $post_title,
+            'post_content' => $post_content,
+            'post_status' => 'publish',
+        ];
+
+        $topic_post_id = wp_insert_post($topic_post_data);
+        update_post_meta($topic_post_id, '_topic_id', $topic_id);
+    }
+}
+
 function forums_plugin_deactivate()
 {
     $query = new WP_Query([

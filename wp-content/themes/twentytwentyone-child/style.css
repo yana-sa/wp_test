@@ -44,6 +44,7 @@ table {
 }
 
 .forum-list {
+    max-width: 70%;
     background-color: #dbd5f4;
     list-style-position: inside;
     padding-block: 30px;
@@ -54,9 +55,43 @@ table {
     padding: 15px;
 }
 
+.topic-list {
+    max-width: 70%;
+    background-color: #dbd5f4;
+    list-style-position: inside;
+    padding: 0;
+}
+
+.topic-list-item {
+    color: #515164;
+    list-style: none;
+}
+
 .add-topic {
     background-color: #515164;
     color: white;
     padding: 20px 20px;
     text-decoration: none;
+}
+
+.topic-list-div {
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid #515164;
+    padding: 15px;
+}
+
+.topic-list-post-div {
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    max-width: 75%;
+}
+
+.topic-list-author-div {
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    max-width: 25%;
 }
