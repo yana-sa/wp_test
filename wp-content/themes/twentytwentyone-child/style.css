@@ -95,3 +95,13 @@ table {
     flex: 1;
     max-width: 25%;
 }
+
+.topic-posts-pagination {
+    display: flex;
+    justify-content: center;
+}
+
+.topic-posts-pagination input.active {
+    background-color: #4e4b59;
+    color: white;
+}

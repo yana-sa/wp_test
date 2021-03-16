@@ -6,12 +6,16 @@
 get_header();
 
 global $post;
+if ( get_query_var( 'paged' ) ) { $page = get_query_var( 'paged' ); }
+elseif ( get_query_var( 'page' ) ) { $page = get_query_var( 'page' ); }
+else { $page = 1; }
+
 $query = new WP_Query([
     'post_type' => 'topic_post',
     'meta_key' => '_topic_id',
     'meta_value' => $post->ID,
     'posts_per_page' => 3,
-    'paged' => get_query_var('page'),
+    'paged' => $page,
     ]);
 ?>
 
@@ -23,7 +27,7 @@ $query = new WP_Query([
     </header>
 
     <div class="entry-content">
-        <ul class='topic-list'>
+        <ul class='topic-list' data-list="topic-list">
             <?php
             while ($query->have_posts()) {
             $query->the_post(); ?>
@@ -34,20 +38,22 @@ $query = new WP_Query([
                     </div><div class="topic-list-author-div">
                         <?php echo get_avatar(get_the_author_meta('ID')); ?>
                         <h5><?php echo get_the_author_meta('display_name'); ?></h5>
-                        <h5><?php echo ucfirst(get_the_author_meta('roles')[0]); ?></h5>
+                        <h5><?php echo ucfirst(get_the_author_meta('roles')[0]);?></h5>
                     </div></div>
                 </li>
                 <?php }
                 wp_reset_query();?>
         </ul>
-        <div class="pagination-main">
-        <?php 	wp_reset_postdata();
-        echo paginate_links([
-                'base'    => get_permalink() . '/%#%/',
-                'current' => max( 1, get_query_var( 'page' ) ),
-                'total'   => $query->max_num_pages,
-            ]);
-        ?>
+        <div class="topic-posts-pagination" data-pagination="topic-posts">
+            <?php $pages = $query->max_num_pages;
+            if ($pages > 1) { ?>
+                <h5>Pages: &nbsp;</h5>
+                <?php for ($i = 1; $i <= $pages; $i++) {?>
+                <input type="button" formmethod="post" value="<?php echo $i ?>" data-page="<?php echo $i ?>" data-topic_id="<?php echo $post->ID ?>" data-button="pagination">
+                <?php } ?>
+            <?php } ?>
+        </div>
+        <div>
         </div>
     </div><!-- .entry-content -->
 

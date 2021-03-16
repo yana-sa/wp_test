@@ -60,8 +60,15 @@ function create_post_types()
         ]
     );
 
-    register_post_type('topic',
-        [
+    register_post_type('topic', [
+            'labels' => [
+                'name' => 'Topics',
+                'singular_name' => 'Topic',
+                'add_new' => 'Add Topic',
+                'all_items' => 'All Topic',
+                'edit_item' => 'Edit Topic',
+                'view_item' => 'View Topic'
+            ],
             'hierarchical' => true,
             'public' => true,
             'has_archive' => true,
@@ -70,10 +77,7 @@ function create_post_types()
             'capability_type' => 'post',
             'show_in_rest' => false,
             'show_in_menu' => false,
-            'supports' => ['page-attributes',
-                'title',
-                'editor',
-                'custom-fields'],
+            'supports' => ['page-attributes', 'title', 'editor', 'custom-fields'],
         ]
     );
 
@@ -256,6 +260,50 @@ function handle_add_new_topic_post()
         update_post_meta($topic_post_id, '_topic_id', $topic_id);
     }
 }
+
+function forums_script_enqueue()
+{
+    wp_register_script('forums-js', get_stylesheet_directory_uri() . '/js/forums.js', ['jquery']);
+    wp_localize_script('forums-js', 'myAjax', ['ajaxurl' => admin_url('admin-ajax.php')]);
+
+    wp_enqueue_script('jquery-js');
+    wp_enqueue_script('forums-js');
+}
+
+add_action('init', 'forums_script_enqueue');
+
+function topic_posts_pagination()
+{
+    $page = !empty($_POST['page']) ? $_POST['page'] : null;
+    $topic_id = !empty($_POST['topic_id']) ? $_POST['topic_id'] : null;
+    $query = new WP_Query([
+        'post_type' => 'topic_post',
+        'meta_key' => '_topic_id',
+        'meta_value' => $topic_id,
+        'paged' => $page,
+        'posts_per_page' => 3,
+    ]);
+
+    $post_count = $query->found_posts;
+    if ($post_count > 3) {
+        $response = [];
+        while ($query->have_posts()) {
+            $query->the_post();
+            $response[] = [
+                'link' => get_the_permalink(),
+                'title' => get_the_title(),
+                'content' => get_the_content(),
+                'author_pic' => get_avatar(get_the_author_meta('ID')),
+                'author_name' => get_the_author_meta('display_name'),
+                'author_role' => ucfirst(get_the_author_meta('roles')[0]),
+            ];
+        }
+
+        wp_send_json($response);
+    }
+}
+
+add_action('wp_ajax_topic_posts_pagination', 'topic_posts_pagination');
 
 function forums_plugin_deactivate()
 {
