@@ -284,8 +284,7 @@ function topic_posts_pagination()
         'posts_per_page' => 3,
     ]);
 
-    $post_count = $query->found_posts;
-    if ($post_count > 3) {
+    if ($topic_id && $page) {
         $response = [];
         while ($query->have_posts()) {
             $query->the_post();
